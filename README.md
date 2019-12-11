@@ -58,6 +58,12 @@ Paste the json below to import a sample dashboard into Grafana.  Requires the `g
       "id": "influxdb",
       "name": "InfluxDB",
       "version": "1.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "singlestat",
+      "name": "Singlestat",
+      "version": ""
     }
   ],
   "annotations": {
@@ -92,53 +98,86 @@ Paste the json below to import a sample dashboard into Grafana.  Requires the `g
       "type": "row"
     },
     {
-      "aliasColors": {},
-      "breakPoint": "50%",
       "cacheTimeout": null,
-      "combine": {
-        "label": "Others",
-        "threshold": "0.03"
-      },
+      "colorBackground": false,
+      "colorValue": true,
+      "colors": [
+        "#299c46",
+        "#37872D",
+        "#37872D"
+      ],
       "datasource": "${DS_RESCUETIME}",
-      "fontSize": "80%",
-      "format": "s",
+      "format": "dthms",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
       "gridPos": {
-        "h": 9,
-        "w": 8,
+        "h": 2,
+        "w": 2,
         "x": 0,
         "y": 1
       },
-      "id": 2,
+      "id": 12,
       "interval": null,
-      "legend": {
-        "show": true,
-        "sort": "total",
-        "sortDesc": true,
-        "values": true
-      },
-      "legendType": "Right side",
       "links": [],
-      "maxDataPoints": 3,
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
       "nullPointMode": "connected",
+      "nullText": null,
       "options": {},
-      "pieType": "donut",
-      "strokeWidth": 1,
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false,
+        "ymax": null,
+        "ymin": null
+      },
+      "tableColumn": "",
       "targets": [
         {
-          "alias": "$tag_category",
           "groupBy": [
             {
               "params": [
-                "category"
+                "$__interval"
               ],
-              "type": "tag"
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
             }
           ],
           "measurement": "activity",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT \"duration\" FROM \"activity\" WHERE $timeFilter DESC GROUP BY \"category\"",
-          "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -148,25 +187,44 @@ Paste the json below to import a sample dashboard into Grafana.  Requires the `g
                   "duration"
                 ],
                 "type": "field"
+              },
+              {
+                "params": [],
+                "type": "sum"
               }
             ]
           ],
-          "tags": []
+          "tags": [
+            {
+              "key": "productivity",
+              "operator": ">",
+              "value": "0"
+            }
+          ]
         }
       ],
+      "thresholds": "",
       "timeFrom": null,
       "timeShift": null,
-      "title": "Categories",
-      "type": "grafana-piechart-panel",
+      "title": "Productive Time",
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
       "valueName": "total"
     },
     {
       "cacheTimeout": null,
       "datasource": "${DS_RESCUETIME}",
       "gridPos": {
-        "h": 9,
-        "w": 16,
-        "x": 8,
+        "h": 6,
+        "w": 15,
+        "x": 2,
         "y": 1
       },
       "id": 7,
@@ -179,7 +237,7 @@ Paste the json below to import a sample dashboard into Grafana.  Requires the `g
           ],
           "defaults": {
             "mappings": [],
-            "max": 6000,
+            "max": 2000,
             "min": 0,
             "thresholds": [
               {
@@ -244,6 +302,311 @@ Paste the json below to import a sample dashboard into Grafana.  Requires the `g
     },
     {
       "aliasColors": {},
+      "breakPoint": "50%",
+      "cacheTimeout": null,
+      "combine": {
+        "label": "Others",
+        "threshold": "0.03"
+      },
+      "datasource": "${DS_RESCUETIME}",
+      "fontSize": "80%",
+      "format": "s",
+      "gridPos": {
+        "h": 6,
+        "w": 7,
+        "x": 17,
+        "y": 1
+      },
+      "id": 2,
+      "interval": null,
+      "legend": {
+        "show": true,
+        "sort": "total",
+        "sortDesc": true,
+        "values": true
+      },
+      "legendType": "Right side",
+      "links": [],
+      "maxDataPoints": 3,
+      "nullPointMode": "connected",
+      "options": {},
+      "pieType": "donut",
+      "strokeWidth": 1,
+      "targets": [
+        {
+          "alias": "$tag_category",
+          "groupBy": [
+            {
+              "params": [
+                "category"
+              ],
+              "type": "tag"
+            }
+          ],
+          "measurement": "activity",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT \"duration\" FROM \"activity\" WHERE $timeFilter DESC GROUP BY \"category\"",
+          "rawQuery": false,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "duration"
+                ],
+                "type": "field"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Categories",
+      "type": "grafana-piechart-panel",
+      "valueName": "total"
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": true,
+      "colors": [
+        "#C4162A",
+        "#C4162A",
+        "#C4162A"
+      ],
+      "datasource": "${DS_RESCUETIME}",
+      "format": "dthms",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 2,
+        "x": 0,
+        "y": 3
+      },
+      "id": 13,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "options": {},
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false,
+        "ymax": null,
+        "ymin": null
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "activity",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "duration"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "sum"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "productivity",
+              "operator": "<",
+              "value": "0"
+            }
+          ]
+        }
+      ],
+      "thresholds": "",
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Distracting Time",
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "total"
+    },
+    {
+      "cacheTimeout": null,
+      "colorBackground": false,
+      "colorValue": false,
+      "colors": [
+        "#299c46",
+        "#37872D",
+        "#37872D"
+      ],
+      "datasource": "${DS_RESCUETIME}",
+      "format": "dthms",
+      "gauge": {
+        "maxValue": 100,
+        "minValue": 0,
+        "show": false,
+        "thresholdLabels": false,
+        "thresholdMarkers": true
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 2,
+        "x": 0,
+        "y": 5
+      },
+      "id": 14,
+      "interval": null,
+      "links": [],
+      "mappingType": 1,
+      "mappingTypes": [
+        {
+          "name": "value to text",
+          "value": 1
+        },
+        {
+          "name": "range to text",
+          "value": 2
+        }
+      ],
+      "maxDataPoints": 100,
+      "nullPointMode": "connected",
+      "nullText": null,
+      "options": {},
+      "postfix": "",
+      "postfixFontSize": "50%",
+      "prefix": "",
+      "prefixFontSize": "50%",
+      "rangeMaps": [
+        {
+          "from": "null",
+          "text": "N/A",
+          "to": "null"
+        }
+      ],
+      "sparkline": {
+        "fillColor": "rgba(31, 118, 189, 0.18)",
+        "full": false,
+        "lineColor": "rgb(31, 120, 193)",
+        "show": false,
+        "ymax": null,
+        "ymin": null
+      },
+      "tableColumn": "",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "activity",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "duration"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "sum"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "thresholds": "",
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Total Time",
+      "type": "singlestat",
+      "valueFontSize": "80%",
+      "valueMaps": [
+        {
+          "op": "=",
+          "text": "N/A",
+          "value": "null"
+        }
+      ],
+      "valueName": "total"
+    },
+    {
+      "aliasColors": {},
       "bars": false,
       "dashLength": 10,
       "dashes": false,
@@ -252,9 +615,9 @@ Paste the json below to import a sample dashboard into Grafana.  Requires the `g
       "fillGradient": 10,
       "gridPos": {
         "h": 8,
-        "w": 24,
+        "w": 12,
         "x": 0,
-        "y": 10
+        "y": 7
       },
       "hiddenSeries": false,
       "id": 4,
@@ -398,9 +761,9 @@ Paste the json below to import a sample dashboard into Grafana.  Requires the `g
       "fillGradient": 10,
       "gridPos": {
         "h": 8,
-        "w": 24,
-        "x": 0,
-        "y": 18
+        "w": 12,
+        "x": 12,
+        "y": 7
       },
       "hiddenSeries": false,
       "id": 10,
@@ -553,7 +916,7 @@ Paste the json below to import a sample dashboard into Grafana.  Requires the `g
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Productive vs. Unproductive Time",
+      "title": "Productive vs. Distracting Time",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -603,10 +966,11 @@ Paste the json below to import a sample dashboard into Grafana.  Requires the `g
   },
   "timepicker": {},
   "timezone": "",
-  "title": "RescueTime",
+  "title": "Personal Stats",
   "uid": "peIaduZgk",
-  "version": 18
-}```
+  "version": 21
+}
+```
 
 # License
 
