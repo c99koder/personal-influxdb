@@ -966,7 +966,7 @@ Paste the json below to import a sample dashboard into Grafana.  Requires the `g
   },
   "timepicker": {},
   "timezone": "",
-  "title": "Personal Stats",
+  "title": "RescueTime",
   "uid": "peIaduZgk",
   "version": 21
 }
