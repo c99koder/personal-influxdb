@@ -80,6 +80,18 @@ Paste the json below to import a sample dashboard into Grafana.  Requires the `g
   "links": [],
   "panels": [
     {
+      "datasource": null,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 9,
+      "title": "RescueTime",
+      "type": "row"
+    },
+    {
       "aliasColors": {},
       "breakPoint": "50%",
       "cacheTimeout": null,
@@ -92,9 +104,9 @@ Paste the json below to import a sample dashboard into Grafana.  Requires the `g
       "format": "s",
       "gridPos": {
         "h": 9,
-        "w": 10,
+        "w": 8,
         "x": 0,
-        "y": 0
+        "y": 1
       },
       "id": 2,
       "interval": null,
@@ -153,9 +165,9 @@ Paste the json below to import a sample dashboard into Grafana.  Requires the `g
       "datasource": "${DS_RESCUETIME}",
       "gridPos": {
         "h": 9,
-        "w": 14,
-        "x": 10,
-        "y": 0
+        "w": 16,
+        "x": 8,
+        "y": 1
       },
       "id": 7,
       "links": [],
@@ -204,7 +216,7 @@ Paste the json below to import a sample dashboard into Grafana.  Requires the `g
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT top(s,10),activity FROM (SELECT sum(\"duration\") as s FROM \"activity\" GROUP BY \"activity\")",
+          "query": "SELECT top(s,10),activity FROM (SELECT sum(\"duration\") as s FROM \"activity\" WHERE $timeFilter GROUP BY \"activity\")",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "table",
@@ -242,7 +254,7 @@ Paste the json below to import a sample dashboard into Grafana.  Requires the `g
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 9
+        "y": 10
       },
       "hiddenSeries": false,
       "id": 4,
@@ -297,6 +309,8 @@ Paste the json below to import a sample dashboard into Grafana.  Requires the `g
           "measurement": "activity",
           "orderByTime": "ASC",
           "policy": "default",
+          "query": "SELECT sum(duration_productivity) FROM (SELECT \"duration\" * \"productivity\" FROM \"activity\" WHERE $timeFilter) GROUP BY time($__interval) fill(linear)",
+          "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -373,6 +387,208 @@ Paste the json below to import a sample dashboard into Grafana.  Requires the `g
         "align": false,
         "alignLevel": null
       }
+    },
+    {
+      "aliasColors": {},
+      "bars": true,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "${DS_RESCUETIME}",
+      "fill": 1,
+      "fillGradient": 10,
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 18
+      },
+      "hiddenSeries": false,
+      "id": 10,
+      "legend": {
+        "alignAsTable": false,
+        "avg": false,
+        "current": false,
+        "hideEmpty": false,
+        "hideZero": false,
+        "max": false,
+        "min": false,
+        "show": false,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 2,
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pluginVersion": "6.5.1",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [
+        {
+          "alias": "A",
+          "color": "#C8F2C2"
+        },
+        {
+          "alias": "B",
+          "color": "#C4162A"
+        }
+      ],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "alias": "A",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "linear"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "activity",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT sum(duration_productivity) FROM (SELECT \"duration\" * \"productivity\" FROM \"activity\" WHERE $timeFilter AND \"productivity\" >= 0) GROUP BY time($__interval) fill(linear)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "productivity"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "sum"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "productivity",
+              "operator": ">",
+              "value": "0"
+            }
+          ]
+        },
+        {
+          "alias": "B",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "linear"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "activity",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT sum(duration_productivity) FROM (SELECT \"duration\" * \"productivity\" FROM \"activity\" WHERE $timeFilter AND \"productivity\" <= 0) GROUP BY time($__interval) fill(linear)",
+          "rawQuery": true,
+          "refId": "B",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "productivity"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "sum"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "productivity",
+              "operator": "<",
+              "value": "0"
+            }
+          ]
+        }
+      ],
+      "thresholds": [
+        {
+          "colorMode": "critical",
+          "fill": true,
+          "line": true,
+          "op": "lt",
+          "value": 0,
+          "yaxis": "left"
+        },
+        {
+          "colorMode": "ok",
+          "fill": true,
+          "line": true,
+          "op": "gt",
+          "value": 0,
+          "yaxis": "left"
+        }
+      ],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Productive vs. Unproductive Time",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "cumulative"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "s",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": false
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     }
   ],
   "schemaVersion": 21,
@@ -382,16 +598,15 @@ Paste the json below to import a sample dashboard into Grafana.  Requires the `g
     "list": []
   },
   "time": {
-    "from": "now-12h",
+    "from": "now-6h",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "",
-  "title": "RescueTime Stats",
+  "title": "RescueTime",
   "uid": "peIaduZgk",
-  "version": 12
-}
-```
+  "version": 18
+}```
 
 # License
 
