@@ -44,6 +44,9 @@ except requests.exceptions.HTTPError as err:
 
 activities = response.json()
 print("Got %s activites from RescueTime" % len(activities['rows']))
+if len(activities['rows']) == 0:
+	sys.exit()
+
 points = []
 
 for activity in activities['rows']:
