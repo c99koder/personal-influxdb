@@ -31,14 +31,15 @@ try:
 	client.create_database(INFLUXDB_DATABASE)
 	client.switch_database(INFLUXDB_DATABASE)
 except InfluxDBClientError as err:
-	print("InfluxDB connection failed: " + err)
+	print("InfluxDB connection failed: %s" % (err))
 	sys.exit()
 
 try:
-	response = requests.get('https://www.rescuetime.com/anapi/data?key=' + RESCUETIME_API_KEY + '&perspective=interval&restrict_kind=activity&format=json')
+	response = requests.get('https://www.rescuetime.com/anapi/data',
+		params={"key":RESCUETIME_API_KEY, "perspective":"interval", "restrict_kind":"activity", "format":"json"})
 	response.raise_for_status()
 except requests.exceptions.HTTPError as err:
-	print("HTTP request failed: " + err)
+	print("HTTP request failed: %s" % (err))
 	sys.exit()
 
 activities = response.json()
