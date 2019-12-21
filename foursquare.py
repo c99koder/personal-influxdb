@@ -85,64 +85,64 @@ us_states = {
 }
 
 def fetch_checkins(offset):
-	try:
-		response = requests.get('https://api.foursquare.com/v2/users/self/checkins',
-			params={'sort': 'newestfirst', 'offset': offset, 'oauth_token':FOURSQUARE_ACCESS_TOKEN, 'v':'20191201', 'limit':250})
-		response.raise_for_status()
-	except requests.exceptions.HTTPError as err:
-		print("HTTP request failed: %s" % (err))
-		sys.exit()
+    try:
+        response = requests.get('https://api.foursquare.com/v2/users/self/checkins',
+            params={'sort': 'newestfirst', 'offset': offset, 'oauth_token':FOURSQUARE_ACCESS_TOKEN, 'v':'20191201', 'limit':250})
+        response.raise_for_status()
+    except requests.exceptions.HTTPError as err:
+        print("HTTP request failed: %s" % (err))
+        sys.exit()
 
-	data = response.json()
-	print("Got %s checkins from Foursquare" % (len(data['response']['checkins']['items'])))
+    data = response.json()
+    print("Got %s checkins from Foursquare" % (len(data['response']['checkins']['items'])))
 
-	for item in data['response']['checkins']['items']:
-		cat = ''
-		if 'venue' in item:
-			for category in item['venue']['categories']:
-				if category['primary']:
-					cat = category['name']
-			tags = {
-				"category": cat,
-				"venue_id": item['venue']['id'],
-				"venue_name": item['venue']['name'],
-				"mayor": item['isMayor']
-			}
-			if 'country' in item['venue']['location']:
-				tags['country'] = item['venue']['location']['country']
-			if 'city' in item['venue']['location']:
-				tags['city'] = item['venue']['location']['city']
-			if 'state' in item['venue']['location']:
-				if item['venue']['location']['state'] in us_states:
-					tags['state'] = us_states[item['venue']['location']['state']]
-				else:
-					tags['state'] = item['venue']['location']['state']
-			points.append({
-					"measurement": "checkin",
-					"time": datetime.fromtimestamp(item['createdAt']).isoformat(),
-					"tags": tags,
-					"fields": {
-						"latitude": float(item['venue']['location']['lat']),
-						"longitude": float(item['venue']['location']['lng'])
-					}
-				})
+    for item in data['response']['checkins']['items']:
+        cat = ''
+        if 'venue' in item:
+            for category in item['venue']['categories']:
+                if category['primary']:
+                    cat = category['name']
+            tags = {
+                "category": cat,
+                "venue_id": item['venue']['id'],
+                "venue_name": item['venue']['name'],
+                "mayor": item['isMayor']
+            }
+            if 'country' in item['venue']['location']:
+                tags['country'] = item['venue']['location']['country']
+            if 'city' in item['venue']['location']:
+                tags['city'] = item['venue']['location']['city']
+            if 'state' in item['venue']['location']:
+                if item['venue']['location']['state'] in us_states:
+                    tags['state'] = us_states[item['venue']['location']['state']]
+                else:
+                    tags['state'] = item['venue']['location']['state']
+            points.append({
+                    "measurement": "checkin",
+                    "time": datetime.fromtimestamp(item['createdAt']).isoformat(),
+                    "tags": tags,
+                    "fields": {
+                        "latitude": float(item['venue']['location']['lat']),
+                        "longitude": float(item['venue']['location']['lng'])
+                    }
+                })
 
-	return len(data['response']['checkins']['items'])
+    return len(data['response']['checkins']['items'])
 
 try:
-	client = InfluxDBClient(host=INFLUXDB_HOST, port=INFLUXDB_PORT, username=INFLUXDB_USERNAME, password=INFLUXDB_PASSWORD)
-	client.create_database(INFLUXDB_DATABASE)
-	client.switch_database(INFLUXDB_DATABASE)
+    client = InfluxDBClient(host=INFLUXDB_HOST, port=INFLUXDB_PORT, username=INFLUXDB_USERNAME, password=INFLUXDB_PASSWORD)
+    client.create_database(INFLUXDB_DATABASE)
+    client.switch_database(INFLUXDB_DATABASE)
 except InfluxDBClientError as err:
-	print("InfluxDB connection failed: %s" % (err))
-	sys.exit()
+    print("InfluxDB connection failed: %s" % (err))
+    sys.exit()
 
 count = fetch_checkins(0)
 
 try:
-	client.write_points(points)
+    client.write_points(points)
 except InfluxDBClientError as err:
-	print("Unable to write points to InfluxDB: %s" % (err))
-	sys.exit()
+    print("Unable to write points to InfluxDB: %s" % (err))
+    sys.exit()
 
 print("Successfully wrote %s data points to InfluxDB" % (len(points)))
