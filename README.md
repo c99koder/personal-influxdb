@@ -13,7 +13,10 @@ Open each Python script and set your API credentials and InfluxDB server configu
 * __Google Play Games__: Download your Google Play Games archive from https://takeout.google.com/ and extract it in the same folder as the script
 
 ## Usage
-Install required python3 modules: `$ pip3 install pytz influxdb requests instaloader`
+Install required python3 modules:
+```
+$ pip3 install pytz influxdb requests instaloader
+```
 
 Run each Python script from the terminal and it will insert the most recent data into InfluxDB.
 
@@ -25,12 +28,24 @@ Run each Python script from the terminal and it will insert the most recent data
 
 ## Grafana Dashboards
 The [grafana](grafana/) folder contains json files for various example dashboards.
-Most dashboards require the `grafana-piechart-panel` plugin, and the Foursquaure panel also requires the panodata `grafana-map-panel` plugin: `grafana-cli --pluginUrl https://packages.hiveeyes.org/grafana/grafana-map-panel/grafana-map-panel-0.8.0.zip plugins install grafana-map-panel`
+Most dashboards require the `grafana-piechart-panel` plugin, and the Foursquaure panel also requires the panodata `grafana-map-panel` plugin:
+```
+$ grafana-cli --pluginUrl https://packages.hiveeyes.org/grafana/grafana-map-panel/grafana-map-panel-0.8.0.zip plugins install grafana-map-panel
+```
 
+### RescueTime dashboard
 ![Grafana RescueTime Screenshot](https://raw.githubusercontent.com/c99koder/personal-influxdb/master/screenshots/grafana-rescuetime.png)
+
+### Fitbit dashboard
 ![Grafana Fitbit Screenshot](https://raw.githubusercontent.com/c99koder/personal-influxdb/master/screenshots/grafana-fitbit.png)
+
+### Gaming dashboard
 ![Grafana Gaming Screenshot](https://raw.githubusercontent.com/c99koder/personal-influxdb/master/screenshots/grafana-gaming.png)
+
+### Foursquare dashboard
 ![Grafana Foursquare Screenshot](https://raw.githubusercontent.com/c99koder/personal-influxdb/master/screenshots/grafana-foursquare.png)
+
+### Instagram dashboard
 ![Grafana Instagram Screenshot](https://raw.githubusercontent.com/c99koder/personal-influxdb/master/screenshots/grafana-instagram.png)
 
 # License
