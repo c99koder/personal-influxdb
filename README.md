@@ -12,6 +12,7 @@ Open each Python script and set your API credentials and InfluxDB server configu
 * __Xbox Live__: Register a profile at https://www.trueachievements.com/ and link it to your Xbox account. You can get your ID number by clicking your "TrueAchievement Points" score on your profile and looking at the leaderboard URL, it will be the `findgamerid` parameter.
 * __Google Play Games__: Download your Google Play Games archive from https://takeout.google.com/ and extract it in the same folder as the script
 * __Todoist__: Create an app at https://developer.todoist.com/appconsole.html and generate a test token
+* __GitHub__: Create a personal access token at https://github.com/settings/tokens
 
 ## Usage
 Install required python3 modules:
