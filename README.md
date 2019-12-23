@@ -50,6 +50,12 @@ $ grafana-cli --pluginUrl https://packages.hiveeyes.org/grafana/grafana-map-pane
 ### Instagram dashboard
 ![Grafana Instagram Screenshot](https://raw.githubusercontent.com/c99koder/personal-influxdb/master/screenshots/grafana-instagram.png)
 
+### Todoist dashboard
+![Grafana Todoist Screenshot](https://raw.githubusercontent.com/c99koder/personal-influxdb/master/screenshots/grafana-todoist.png)
+
+### GitHub dashboard
+![Grafana GitHub Screenshot](https://raw.githubusercontent.com/c99koder/personal-influxdb/master/screenshots/grafana-github.png)
+
 # License
 
 Copyright (C) 2019 Sam Steele. Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
