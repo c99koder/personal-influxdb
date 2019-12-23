@@ -11,11 +11,12 @@ Open each Python script and set your API credentials and InfluxDB server configu
 * __Nintendo Switch__: You'll need to set up [mitmproxy](https://mitmproxy.org/) and intercept the Nintendo Switch Parent Controls app on an iOS or Android device to grab your authentication tokens and device IDs
 * __Xbox Live__: Register a profile at https://www.trueachievements.com/ and link it to your Xbox account. You can get your ID number by clicking your "TrueAchievement Points" score on your profile and looking at the leaderboard URL, it will be the `findgamerid` parameter.
 * __Google Play Games__: Download your Google Play Games archive from https://takeout.google.com/ and extract it in the same folder as the script
+* __Todoist__: Create an app at https://developer.todoist.com/appconsole.html and generate a test token
 
 ## Usage
 Install required python3 modules:
 ```
-$ pip3 install pytz influxdb requests instaloader
+$ pip3 install pytz influxdb requests instaloader todoist-python
 ```
 
 Run each Python script from the terminal and it will insert the most recent data into InfluxDB.
