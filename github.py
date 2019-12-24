@@ -26,6 +26,20 @@ INFLUXDB_USERNAME = 'root'
 INFLUXDB_PASSWORD = 'root'
 INFLUXDB_DATABASE = 'github'
 
+def add_week(week):
+    if week['c'] > 0:
+        points.append({
+            "measurement": "commits",
+            "time": datetime.fromtimestamp(week['w']).isoformat(),
+            "tags": {
+                "username": GITHUB_USERNAME,
+                "repo": repo['full_name']
+            },
+            "fields": {
+                "value": week['c']
+            }
+        })
+
 try:
     client = InfluxDBClient(host=INFLUXDB_HOST, port=INFLUXDB_PORT, username=INFLUXDB_USERNAME, password=INFLUXDB_PASSWORD)
     client.create_database(INFLUXDB_DATABASE)
@@ -64,19 +78,13 @@ for repo in repos:
     contributors = response.json()
     for contributor in contributors:
         if contributor['author']['login'] == GITHUB_USERNAME:
-            for week in contributor['weeks']:
-                if week['c'] > 0:
-                    points.append({
-                        "measurement": "commits",
-                        "time": datetime.fromtimestamp(week['w']).isoformat(),
-                        "tags": {
-                            "username": GITHUB_USERNAME,
-                            "repo": repo['full_name']
-                        },
-                        "fields": {
-                            "value": week['c']
-                        }
-                    })
+#            adding all the old data each time causes a lot of stress on InfluxDB
+#            for week in contributor['weeks']:
+#                add_week(week)
+            if len(contributor['weeks']) > 0:
+                add_week(contributor['weeks'][len(contributor['weeks']) - 1])
+            if len(contributor['weeks']) > 1:
+                add_week(contributor['weeks'][len(contributor['weeks']) - 2])
 
 try:
     client.write_points(points)
