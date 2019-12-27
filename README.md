@@ -13,11 +13,12 @@ Open each Python script and set your API credentials and InfluxDB server configu
 * __Google Play Games__: Download your Google Play Games archive from https://takeout.google.com/ and extract it in the same folder as the script
 * __Todoist__: Create an app at https://developer.todoist.com/appconsole.html and generate a test token
 * __GitHub__: Create a personal access token at https://github.com/settings/tokens
+* __Trakt.tv__: Register for an API key at https://trakt.tv/oauth/applications and generate an OAuth2 access token, you'll also need to create an API key at https://www.themoviedb.org/settings/api to download movie / show posters
 
 ## Usage
 Install required python3 modules:
 ```
-$ pip3 install pytz influxdb requests instaloader todoist-python
+$ pip3 install pytz influxdb requests instaloader todoist-python trakt.py
 ```
 
 Run each Python script from the terminal and it will insert the most recent data into InfluxDB.
@@ -55,6 +56,9 @@ $ grafana-cli --pluginUrl https://packages.hiveeyes.org/grafana/grafana-map-pane
 
 ### GitHub dashboard
 ![Grafana GitHub Screenshot](https://raw.githubusercontent.com/c99koder/personal-influxdb/master/screenshots/grafana-github.png)
+
+### Trakt.tv dashboard
+![Grafana Trakt.tv Screenshot](https://raw.githubusercontent.com/c99koder/personal-influxdb/master/screenshots/grafana-trakt.png)
 
 # License
 
