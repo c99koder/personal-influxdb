@@ -34,6 +34,8 @@ points = []
 posters = {}
 
 def fetch_poster(type, tmdb_id):
+	if tmdb_id == None:
+		return None
 	print("Fetching poster for type=" + type + " id=" + tmdb_id)
 	try:
 		response = requests.get('https://api.themoviedb.org/3/' + type + '/' + tmdb_id, 
@@ -82,25 +84,25 @@ for item in Trakt['sync/history'].get(pagination=True, per_page=100, start_at=da
 			else:
 				html = '<img src="' + posters[item.show.get_key('tmdb')] + '"/>'
 			points.append({
-					"measurement": "watch",
-					"time": item.watched_at.isoformat(),
-					"tags": {
-						"id": item.get_key('trakt'),
-						"show": item.show.title,
-						"show_id": item.show.get_key('trakt'),
-						"season": item.pk[0],
-						"episode": item.pk[1],
-						"type": "episode"
-					},
-					"fields": {
-						"title": item.title,
-						"tmdb_id": item.show.get_key('tmdb'),
-						"poster": posters[item.show.get_key('tmdb')],
-						"poster_html": html,
-						"slug": item.show.get_key('slug'),
-						"url": "https://trakt.tv/shows/" + item.show.get_key('slug'),
-						"episode_url": "https://trakt.tv/shows/" + item.show.get_key('slug') + "/seasons/" + str(item.pk[0]) + "/episodes/" + str(item.pk[1])
-					}
+				"measurement": "watch",
+				"time": item.watched_at.isoformat(),
+				"tags": {
+					"id": item.get_key('trakt'),
+					"show": item.show.title,
+					"show_id": item.show.get_key('trakt'),
+					"season": item.pk[0],
+					"episode": item.pk[1],
+					"type": "episode"
+				},
+				"fields": {
+					"title": item.title,
+					"tmdb_id": item.show.get_key('tmdb'),
+					"poster": posters[item.show.get_key('tmdb')],
+					"poster_html": html,
+					"slug": item.show.get_key('slug'),
+					"url": "https://trakt.tv/shows/" + item.show.get_key('slug'),
+					"episode_url": "https://trakt.tv/shows/" + item.show.get_key('slug') + "/seasons/" + str(item.pk[0]) + "/episodes/" + str(item.pk[1])
+				}
 			})
 		if isinstance(item, Movie):
 			if not item.get_key('tmdb') in posters:
@@ -110,21 +112,31 @@ for item in Trakt['sync/history'].get(pagination=True, per_page=100, start_at=da
 			else:
 				html = '<img src="' + posters[item.get_key('tmdb')] + '"/>'
 			points.append({
-					"measurement": "watch",
-					"time": item.watched_at.isoformat(),
-					"tags": {
-						"id": item.get_key('trakt'),
-						"type": "movie"
-					},
-					"fields": {
-						"title": item.title,
-						"tmdb_id": item.get_key('tmdb'),
-						"poster": posters[item.get_key('tmdb')],
-						"poster_html": html,
-						"slug": item.get_key('slug'),
-						"url": "https://trakt.tv/movie/" + item.get_key('slug')
-					}
-				})
+				"measurement": "watch",
+				"time": item.watched_at.isoformat(),
+				"tags": {
+					"id": item.get_key('trakt'),
+					"type": "movie"
+				},
+				"fields": {
+					"title": item.title,
+					"tmdb_id": item.get_key('tmdb'),
+					"poster": posters[item.get_key('tmdb')],
+					"poster_html": html,
+					"slug": item.get_key('slug'),
+					"url": "https://trakt.tv/movie/" + item.get_key('slug')
+				}
+			})
+
+		if len(points) >= 5000:
+			try:
+				client.write_points(points)
+			except InfluxDBClientError as err:
+				print("Unable to write points to InfluxDB: %s" % (err))
+				sys.exit()
+
+			print("Successfully wrote %s data points to InfluxDB" % (len(points)))
+			points = []
 
 try:
 	client.write_points(points)
