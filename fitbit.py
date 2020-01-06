@@ -123,6 +123,60 @@ def process_levels(levels):
                 }
             })
 
+def fetch_activities(date):
+    try:
+        response = requests.get('https://api.fitbit.com/1/user/-/activities/list.json',
+            headers={'Authorization': 'Bearer ' + FITBIT_ACCESS_TOKEN, 'Accept-Language': FITBIT_LANGUAGE},
+            params={'beforeDate': date, 'sort':'desc', 'limit':10, 'offset':0})
+        response.raise_for_status()
+    except requests.exceptions.HTTPError as err:
+        print("HTTP request failed: %s" % (err))
+        sys.exit()
+
+    data = response.json()
+    print("Got activities from Fitbit")
+
+    for activity in data['activities']:
+        fields = {}
+
+        if 'activeDuration' in activity:
+            fields['activeDuration'] = int(activity['activeDuration'])
+        if 'averageHeartRate' in activity:
+            fields['averageHeartRate'] = int(activity['averageHeartRate'])
+        if 'calories' in activity:
+            fields['calories'] = int(activity['calories'])
+        if 'duration' in activity:
+            fields['duration'] = int(activity['duration'])
+        if 'distance' in activity:
+            fields['distance'] = float(activity['distance'])
+            fields['distanceUnit'] = activity['distanceUnit']
+        if 'pace' in activity:
+            fields['pace'] = float(activity['pace'])
+        if 'speed' in activity:
+            fields['speed'] = float(activity['speed'])
+        if 'elevationGain' in activity:
+            fields['elevationGain'] = int(activity['elevationGain'])
+        if 'steps' in activity:
+            fields['steps'] = int(activity['steps'])
+
+        for level in activity['activityLevel']:
+            if level['name'] == 'sedentary':
+                fields[level['name'] + "Minutes"] = int(level['minutes'])
+            else:
+                fields[level['name'] + "ActiveMinutes"] = int(level['minutes'])
+
+
+        time = datetime.fromisoformat(activity['startTime'])
+        utc_time = time.astimezone(pytz.utc).isoformat()
+        points.append({
+            "measurement": "activity",
+            "time": utc_time,
+            "tags": {
+                "activityName": activity['activityName']
+            },
+            "fields": fields
+        })
+
 try:
     client = InfluxDBClient(host=INFLUXDB_HOST, port=INFLUXDB_PORT, username=INFLUXDB_USERNAME, password=INFLUXDB_PASSWORD)
     client.create_database(INFLUXDB_DATABASE)
@@ -234,6 +288,7 @@ fetch_data('body', 'weight')
 fetch_data('body', 'fat')
 fetch_data('body', 'bmi')
 fetch_heartrate(date.today().isoformat())
+fetch_activities(date.today().isoformat())
 
 try:
     client.write_points(points)
