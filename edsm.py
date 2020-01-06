@@ -145,7 +145,7 @@ add_rank(data, "Federation")
 add_rank(data, "Empire")
 
 requests_cache.install_cache('edsm')
-data = fetch_jumps("2019-12-15 00:00:00")
+data = fetch_jumps(date.today().isoformat() + " 00:00:00")
 
 try:
     client.write_points(points)
