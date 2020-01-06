@@ -23,6 +23,8 @@ FITBIT_LANGUAGE = 'en_US'
 FITBIT_CLIENT_ID = ''
 FITBIT_CLIENT_SECRET = ''
 FITBIT_ACCESS_TOKEN = ''
+FITBIT_INITIAL_CODE = ''
+REDIRECT_URI = 'https://localhost'
 INFLUXDB_HOST = 'localhost'
 INFLUXDB_PORT = 8086
 INFLUXDB_USERNAME = 'root'
@@ -128,6 +130,36 @@ try:
 except InfluxDBClientError as err:
     print("InfluxDB connection failed: %s" % (err))
     sys.exit()
+
+if not FITBIT_ACCESS_TOKEN:
+    if os.path.isfile('.fitbit-refreshtoken'):
+        f = open(".fitbit-refreshtoken", "r")
+        token = f.read();
+        f.close();
+        response = requests.post('https://api.fitbit.com/oauth2/token',
+            data={
+                "client_id": FITBIT_CLIENT_ID,
+                "grant_type": "refresh_token",
+                "redirect_uri": REDIRECT_URI,
+                "refresh_token": token
+            }, auth=(FITBIT_CLIENT_ID, FITBIT_CLIENT_SECRET))
+    else:
+        response = requests.post('https://api.fitbit.com/oauth2/token',
+            data={
+                "client_id": FITBIT_CLIENT_ID,
+                "grant_type": "authorization_code",
+                "redirect_uri": REDIRECT_URI,
+                "code": FITBIT_INITIAL_CODE
+            }, auth=(FITBIT_CLIENT_ID, FITBIT_CLIENT_SECRET))
+
+    response.raise_for_status();
+
+    json = response.json()
+    FITBIT_ACCESS_TOKEN = json['access_token']
+    refresh_token = json['refresh_token']
+    f = open(".fitbit-refreshtoken", "w+")
+    f.write(refresh_token)
+    f.close()
 
 end = date.today()
 start = end - timedelta(days=1)

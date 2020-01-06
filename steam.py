@@ -81,7 +81,7 @@ for app in fetch_recents():
         if recent['appid'] == app['appid']:
             value = app['playtime_2weeks'];
             total = list(totals.get_points(tags={'application_id': str(app['appid'])}));
-            if len(total) == 1:
+            if len(total) == 1 and total[0]['total'] > 0:
                 value = app['playtime_forever'] - total[0]['total']
             if value > 1:
                 points.append({
