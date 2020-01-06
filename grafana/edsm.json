@@ -76,7 +76,7 @@
         "#d44a3a"
       ],
       "datasource": "${DS_EDSM}",
-      "format": "none",
+      "format": "locale",
       "gauge": {
         "maxValue": 100,
         "minValue": 0,
@@ -140,7 +140,7 @@
             [
               {
                 "params": [
-                  "system"
+                  "distance"
                 ],
                 "type": "field"
               },
@@ -424,7 +424,7 @@
             [
               {
                 "params": [
-                  "system"
+                  "distance"
                 ],
                 "type": "field"
               },
@@ -1337,5 +1337,5 @@
   "timezone": "",
   "title": "EDSM",
   "uid": "U65tuRmgz",
-  "version": 6
+  "version": 8
 }
