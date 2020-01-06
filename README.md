@@ -14,11 +14,12 @@ Open each Python script and set your API credentials and InfluxDB server configu
 * __Todoist__: Create an app at https://developer.todoist.com/appconsole.html and generate a test token
 * __GitHub__: Create a personal access token at https://github.com/settings/tokens
 * __Trakt.tv__: Register for an API key at https://trakt.tv/oauth/applications and generate an OAuth2 access token, you'll also need to create an API key at https://www.themoviedb.org/settings/api to download movie / show posters
+* __EDSM__: Generate an API key at https://www.edsm.net/en/settings/api
 
 ## Usage
 Install required python3 modules:
 ```
-$ pip3 install pytz influxdb requests instaloader todoist-python trakt.py
+$ pip3 install pytz influxdb requests requests-cache instaloader todoist-python trakt.py
 ```
 
 Run each Python script from the terminal and it will insert the most recent data into InfluxDB.
@@ -59,6 +60,9 @@ $ grafana-cli --pluginUrl https://packages.hiveeyes.org/grafana/grafana-map-pane
 
 ### Trakt.tv dashboard
 ![Grafana Trakt.tv Screenshot](https://raw.githubusercontent.com/c99koder/personal-influxdb/master/screenshots/grafana-trakt.png)
+
+### EDSM dashboard
+![Grafana EDSM Screenshot](https://raw.githubusercontent.com/c99koder/personal-influxdb/master/screenshots/grafana-edsm.png)
 
 # License
 
