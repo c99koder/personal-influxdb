@@ -189,7 +189,6 @@ totals = client.query('SELECT sum("value") AS "total" FROM "time" WHERE "value" 
 for total in list(totals.get_points()):
     date = datetime.fromisoformat(total['time'].strip('Z')).strftime('%Y-%m-%d')
     if total['total'] != None and total['total'] > 0:
-        print("%s: %s" % (total['time'], int(total['total'] / 60)))
         values.append({'date': date, 'name': 'gaming_min', 'value': int(total['total'] / 60)})
         tags.append({'date': date, 'value': 'gaming'})
     else:
