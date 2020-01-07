@@ -26,6 +26,9 @@ INFLUXDB_PORT = 8086
 INFLUXDB_USERNAME = 'root'
 INFLUXDB_PASSWORD = 'root'
 INFLUXDB_DATABASE = 'exist'
+FITBIT_DATABASE = 'fitbit'
+TRAKT_DATABASE = 'trakt'
+GAMING_DATABASE = 'gaming'
 points = []
 start_time = str(int(LOCAL_TIMEZONE.localize(datetime.combine(date.today(), time(0,0)) - timedelta(days=7)).astimezone(pytz.utc).timestamp()) * 1000) + 'ms'
 
@@ -88,7 +91,7 @@ except InfluxDBClientError as err:
     print("InfluxDB connection failed: %s" % (err))
     sys.exit()
 
-acquire_attributes([{"name":"gaming_min", "active":True}])
+acquire_attributes([{"name":"gaming_min", "active":True}, {"name":"tv_min", "active":True}])
 
 try:
     response = requests.get('https://exist.io/api/1/users/' + EXIST_USERNAME + '/insights/',
@@ -164,7 +167,7 @@ print("Successfully wrote %s data points to InfluxDB" % (len(points)))
 
 values = []
 tags = []
-client.switch_database('fitbit')
+client.switch_database(FITBIT_DATABASE)
 totals = client.query('SELECT count("duration") AS "total" FROM "activity" WHERE activityName = \'Meditating\' AND time >= ' + start_time + ' GROUP BY time(1d) ORDER BY "time" DESC')
 for total in list(totals.get_points()):
     if total['total'] > 0:
@@ -177,14 +180,17 @@ for total in list(totals.get_points()):
         date = datetime.fromisoformat(total['time'].strip('Z')).strftime('%Y-%m-%d')
         tags.append({'date': date, 'value': 'exercise'})
 
-client.switch_database('trakt')
-totals = client.query('SELECT count("title") AS "total" FROM "watch" WHERE time >= ' + start_time + ' GROUP BY time(1d) ORDER BY "time" DESC')
+client.switch_database(TRAKT_DATABASE)
+totals = client.query('SELECT sum("duration") AS "total" FROM "watch" WHERE time >= ' + start_time + ' GROUP BY time(1d) ORDER BY "time" DESC')
 for total in list(totals.get_points()):
-    if total['total'] > 0:
-        date = datetime.fromisoformat(total['time'].strip('Z')).strftime('%Y-%m-%d')
+    date = datetime.fromisoformat(total['time'].strip('Z')).strftime('%Y-%m-%d')
+    if total['total'] != None and total['total'] > 0:
+        values.append({'date': date, 'name': 'tv_min', 'value': int(total['total'])})
         tags.append({'date': date, 'value': 'tv'})
+    else:
+        values.append({'date': date, 'name': 'tv_min', 'value': 0})
 
-client.switch_database('gaming')
+client.switch_database(GAMING_DATABASE)
 totals = client.query('SELECT sum("value") AS "total" FROM "time" WHERE "value" > 0 AND time >= ' + start_time + ' GROUP BY time(1d) ORDER BY "time" DESC')
 for total in list(totals.get_points()):
     date = datetime.fromisoformat(total['time'].strip('Z')).strftime('%Y-%m-%d')
