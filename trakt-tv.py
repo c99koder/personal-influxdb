@@ -13,7 +13,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import requests, sys, os, json
+import requests, requests_cache, sys, os, json
 from datetime import datetime, date
 from influxdb import InfluxDBClient
 from influxdb.exceptions import InfluxDBClientError
@@ -38,7 +38,8 @@ def fetch_poster(type, tmdb_id):
 		return None
 	print("Fetching poster for type=" + type + " id=" + tmdb_id)
 	try:
-		response = requests.get('https://api.themoviedb.org/3/' + type + '/' + tmdb_id, 
+		with requests_cache.enabled('tmdb'):
+			response = requests.get('https://api.themoviedb.org/3/' + type + '/' + tmdb_id, 
 			params={'api_key': TMDB_API_KEY})
 		response.raise_for_status()
 	except requests.exceptions.HTTPError as err:
@@ -74,7 +75,7 @@ else:
 
 Trakt.configuration.defaults.oauth.from_response(auth)
 
-for item in Trakt['sync/history'].get(pagination=True, per_page=100, start_at=datetime(date.today().year, date.today().month, 1)):
+for item in Trakt['sync/history'].get(pagination=True, per_page=100, start_at=datetime(date.today().year, date.today().month, 1), extended='full'):
 	if item.action == "watch":
 		if isinstance(item, Episode):
 			if not item.show.get_key('tmdb') in posters:
@@ -97,6 +98,7 @@ for item in Trakt['sync/history'].get(pagination=True, per_page=100, start_at=da
 				"fields": {
 					"title": item.title,
 					"tmdb_id": item.show.get_key('tmdb'),
+					"duration": item.show.runtime,
 					"poster": posters[item.show.get_key('tmdb')],
 					"poster_html": html,
 					"slug": item.show.get_key('slug'),
@@ -121,6 +123,7 @@ for item in Trakt['sync/history'].get(pagination=True, per_page=100, start_at=da
 				"fields": {
 					"title": item.title,
 					"tmdb_id": item.get_key('tmdb'),
+					"duration": item.runtime,
 					"poster": posters[item.get_key('tmdb')],
 					"poster_html": html,
 					"slug": item.get_key('slug'),
