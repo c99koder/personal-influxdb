@@ -149,11 +149,10 @@ for insight in data['results']:
             "group": insight['type']['attribute']['group']['label'],
         },
         "fields": {
-            "html": insight['html'],
+            "html": insight['html'].replace("\n", "").replace("\r", ""),
             "text": insight['text']
         }
     })
-
 fetch_attribute('custom')
 fetch_attribute('mood')
 
