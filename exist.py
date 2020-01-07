@@ -13,11 +13,12 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import requests, sys
-from datetime import datetime, date, timedelta
+import requests, pytz, sys
+from datetime import datetime, date, timedelta, time
 from influxdb import InfluxDBClient
 from influxdb.exceptions import InfluxDBClientError
 
+LOCAL_TIMEZONE = pytz.timezone('America/New_York')
 EXIST_ACCESS_TOKEN = ''
 EXIST_USERNAME = ''
 INFLUXDB_HOST = 'localhost'
@@ -26,6 +27,7 @@ INFLUXDB_USERNAME = 'root'
 INFLUXDB_PASSWORD = 'root'
 INFLUXDB_DATABASE = 'exist'
 points = []
+start_time = str(int(LOCAL_TIMEZONE.localize(datetime.combine(date.today(), time(0,0)) - timedelta(days=7)).astimezone(pytz.utc).timestamp()) * 1000) + 'ms'
 
 def append_tags(tags):
     try:
@@ -78,42 +80,6 @@ def post_attributes(values):
     if len(result['success']) > 0:
         print("Successfully sent %s attributes" % len(result['success']))
 
-def fetch_attribute(attribute):
-    try:
-        response = requests.get('https://exist.io/api/1/users/' + EXIST_USERNAME + '/attributes/' + attribute + '/?limit=10',
-            headers={'Authorization':'Bearer ' + EXIST_ACCESS_TOKEN})
-        response.raise_for_status()
-    except requests.exceptions.HTTPError as err:
-        print("HTTP request failed: %s" % (err))
-        sys.exit()
-    data = response.json()
-    print("Got %s %s values from exist.io" % (len(data['results']), attribute))
-
-    for result in data['results']:
-        if result['value'] != None:
-            if attribute == 'custom':
-                for tag in result['value'].split(', '):
-                    if len(tag) > 0:
-                        points.append({
-                            "measurement": attribute,
-                            "time": result['date'] + "T00:00:00",
-                            "tags": {
-                                "tag": tag
-                            },
-                            "fields": {
-                                "value": tag
-                            }
-                        })
-            else:
-                points.append({
-                    "measurement": attribute,
-                    "time": result['date'] + "T00:00:00",
-                    "fields": {
-                        "value": result['value']
-                    }
-                })
-    return data
-
 try:
     client = InfluxDBClient(host=INFLUXDB_HOST, port=INFLUXDB_PORT, username=INFLUXDB_USERNAME, password=INFLUXDB_PASSWORD)
     client.create_database(INFLUXDB_DATABASE)
@@ -153,8 +119,40 @@ for insight in data['results']:
             "text": insight['text']
         }
     })
-fetch_attribute('custom')
-fetch_attribute('mood')
+
+try:
+    response = requests.get('https://exist.io/api/1/users/' + EXIST_USERNAME + '/attributes/?limit=7&groups=custom,mood',
+        headers={'Authorization':'Bearer ' + EXIST_ACCESS_TOKEN})
+    response.raise_for_status()
+except requests.exceptions.HTTPError as err:
+    print("HTTP request failed: %s" % (err))
+    sys.exit()
+
+data = response.json()
+print("Got attributes from exist.io")
+
+for result in data:
+    for value in result['values']:
+        if value['value'] != None and value['value'] != '' and result['attribute'] != 'custom':
+            if result['group']['name'] == 'custom':
+                points.append({
+                    "measurement": result['group']['name'],
+                    "time": value['date'] + "T00:00:00",
+                    "tags": {
+                        "tag": result['label']
+                    },
+                    "fields": {
+                        "value": value['value']
+                    }
+                })
+            else:
+                points.append({
+                    "measurement": result['group']['name'],
+                    "time": value['date'] + "T00:00:00",
+                    "fields": {
+                        "value": value['value']
+                    }
+                })
 
 try:
     client.write_points(points)
@@ -167,30 +165,31 @@ print("Successfully wrote %s data points to InfluxDB" % (len(points)))
 values = []
 tags = []
 client.switch_database('fitbit')
-totals = client.query('SELECT count("duration") AS "total" FROM "activity" WHERE activityName = \'Meditating\' AND time > now() - 7d GROUP BY time(1d) ORDER BY "time" DESC')
+totals = client.query('SELECT count("duration") AS "total" FROM "activity" WHERE activityName = \'Meditating\' AND time >= ' + start_time + ' GROUP BY time(1d) ORDER BY "time" DESC')
 for total in list(totals.get_points()):
     if total['total'] > 0:
         date = datetime.fromisoformat(total['time'].strip('Z')).strftime('%Y-%m-%d')
         tags.append({'date': date, 'value': 'meditation'})
 
-totals = client.query('SELECT count("duration") AS "total" FROM "activity" WHERE activityName != \'Meditating\' AND time > now() - 7d GROUP BY time(1d) ORDER BY "time" DESC')
+totals = client.query('SELECT count("duration") AS "total" FROM "activity" WHERE activityName != \'Meditating\' AND time >= ' + start_time + ' GROUP BY time(1d) ORDER BY "time" DESC')
 for total in list(totals.get_points()):
     if total['total'] > 0:
         date = datetime.fromisoformat(total['time'].strip('Z')).strftime('%Y-%m-%d')
         tags.append({'date': date, 'value': 'exercise'})
 
 client.switch_database('trakt')
-totals = client.query('SELECT count("title") AS "total" FROM "watch" WHERE time > now() - 7d GROUP BY time(1d) ORDER BY "time" DESC')
+totals = client.query('SELECT count("title") AS "total" FROM "watch" WHERE time >= ' + start_time + ' GROUP BY time(1d) ORDER BY "time" DESC')
 for total in list(totals.get_points()):
     if total['total'] > 0:
         date = datetime.fromisoformat(total['time'].strip('Z')).strftime('%Y-%m-%d')
         tags.append({'date': date, 'value': 'tv'})
 
 client.switch_database('gaming')
-totals = client.query('SELECT sum("value") AS "total" FROM "time" WHERE "value" > 0 AND time > now() - 7d GROUP BY time(1d) ORDER BY "time" DESC')
+totals = client.query('SELECT sum("value") AS "total" FROM "time" WHERE "value" > 0 AND time >= ' + start_time + ' GROUP BY time(1d) ORDER BY "time" DESC')
 for total in list(totals.get_points()):
     date = datetime.fromisoformat(total['time'].strip('Z')).strftime('%Y-%m-%d')
     if total['total'] != None and total['total'] > 0:
+        print("%s: %s" % (total['time'], int(total['total'] / 60)))
         values.append({'date': date, 'name': 'gaming_min', 'value': int(total['total'] / 60)})
         tags.append({'date': date, 'value': 'gaming'})
     else:
