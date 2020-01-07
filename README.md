@@ -15,6 +15,7 @@ Open each Python script and set your API credentials and InfluxDB server configu
 * __GitHub__: Create a personal access token at https://github.com/settings/tokens
 * __Trakt.tv__: Register for an API key at https://trakt.tv/oauth/applications and generate an OAuth2 access token, you'll also need to create an API key at https://www.themoviedb.org/settings/api to download movie / show posters
 * __EDSM__: Generate an API key at https://www.edsm.net/en/settings/api
+* __Exist__: Register an app at https://exist.io/account/apps/
 
 ## Usage
 Install required python3 modules:
@@ -64,9 +65,12 @@ $ grafana-cli --pluginUrl https://packages.hiveeyes.org/grafana/grafana-map-pane
 ### EDSM dashboard
 ![Grafana EDSM Screenshot](https://raw.githubusercontent.com/c99koder/personal-influxdb/master/screenshots/grafana-edsm.png)
 
+### Exist dashboard
+![Grafana Exist Screenshot](https://raw.githubusercontent.com/c99koder/personal-influxdb/master/screenshots/grafana-exist.png)
+
 # License
 
-Copyright (C) 2019 Sam Steele. Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
+Copyright (C) 2020 Sam Steele. Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
 
 http://www.apache.org/licenses/LICENSE-2.0
 
