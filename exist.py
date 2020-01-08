@@ -168,37 +168,45 @@ print("Successfully wrote %s data points to InfluxDB" % (len(points)))
 values = []
 tags = []
 client.switch_database(FITBIT_DATABASE)
-totals = client.query('SELECT count("duration") AS "total" FROM "activity" WHERE activityName = \'Meditating\' AND time >= ' + start_time + ' GROUP BY time(1d) ORDER BY "time" DESC')
-for total in list(totals.get_points()):
-    if total['total'] > 0:
-        date = datetime.fromisoformat(total['time'].strip('Z')).strftime('%Y-%m-%d')
+durations = client.query('SELECT "duration" FROM "activity" WHERE activityName = \'Meditating\' AND time >= ' + start_time)
+for duration in list(durations.get_points()):
+    if duration['duration'] > 0:
+        date = datetime.fromisoformat(duration['time'].strip('Z') + "+00:00").astimezone(LOCAL_TIMEZONE).strftime('%Y-%m-%d')
         tags.append({'date': date, 'value': 'meditation'})
 
-totals = client.query('SELECT count("duration") AS "total" FROM "activity" WHERE activityName != \'Meditating\' AND time >= ' + start_time + ' GROUP BY time(1d) ORDER BY "time" DESC')
-for total in list(totals.get_points()):
-    if total['total'] > 0:
-        date = datetime.fromisoformat(total['time'].strip('Z')).strftime('%Y-%m-%d')
+durations = client.query('SELECT "duration" FROM "activity" WHERE activityName = \'Meditating\' AND time >= ' + start_time)
+for duration in list(durations.get_points()):
+    if duration['duration'] > 0:
+        date = datetime.fromisoformat(duration['time'].strip('Z') + "+00:00").astimezone(LOCAL_TIMEZONE).strftime('%Y-%m-%d')
         tags.append({'date': date, 'value': 'exercise'})
 
+totals = {}
 client.switch_database(TRAKT_DATABASE)
-totals = client.query('SELECT sum("duration") AS "total" FROM "watch" WHERE time >= ' + start_time + ' GROUP BY time(1d) ORDER BY "time" DESC')
-for total in list(totals.get_points()):
-    date = datetime.fromisoformat(total['time'].strip('Z')).strftime('%Y-%m-%d')
-    if total['total'] != None and total['total'] > 0:
-        values.append({'date': date, 'name': 'tv_min', 'value': int(total['total'])})
-        tags.append({'date': date, 'value': 'tv'})
+durations = client.query('SELECT "duration" FROM "watch" WHERE time >= ' + start_time)
+for duration in list(durations.get_points()):
+    date = datetime.fromisoformat(duration['time'].strip('Z') + "+00:00").astimezone(LOCAL_TIMEZONE).strftime('%Y-%m-%d')
+    if date in totals:
+        totals[date] = totals[date] + duration['duration']
     else:
-        values.append({'date': date, 'name': 'tv_min', 'value': 0})
+        totals[date] = duration['duration']
 
+for date in totals:
+    values.append({'date': date, 'name': 'tv_min', 'value': int(totals[date])})
+    tags.append({'date': date, 'value': 'tv'})
+
+totals = {}
 client.switch_database(GAMING_DATABASE)
-totals = client.query('SELECT sum("value") AS "total" FROM "time" WHERE "value" > 0 AND time >= ' + start_time + ' GROUP BY time(1d) ORDER BY "time" DESC')
-for total in list(totals.get_points()):
-    date = datetime.fromisoformat(total['time'].strip('Z')).strftime('%Y-%m-%d')
-    if total['total'] != None and total['total'] > 0:
-        values.append({'date': date, 'name': 'gaming_min', 'value': int(total['total'] / 60)})
-        tags.append({'date': date, 'value': 'gaming'})
+durations = client.query('SELECT "value" FROM "time" WHERE "value" > 0 AND time >= ' + start_time)
+for duration in list(durations.get_points()):
+    date = datetime.fromisoformat(duration['time'].strip('Z') + "+00:00").astimezone(LOCAL_TIMEZONE).strftime('%Y-%m-%d')
+    if date in totals:
+        totals[date] = totals[date] + duration['value']
     else:
-        values.append({'date': date, 'name': 'gaming_min', 'value': 0})
+        totals[date] = duration['value']
+
+for date in totals:
+    values.append({'date': date, 'name': 'gaming_min', 'value': int(totals[date] / 60)})
+    tags.append({'date': date, 'value': 'gaming'})
 
 append_tags(tags)
 post_attributes(values)
