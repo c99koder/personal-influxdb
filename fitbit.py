@@ -44,10 +44,10 @@ def fetch_data(category, type):
     data = response.json()
     print("Got " + type + " from Fitbit")
 
-    for day in data[category + '-' + type]:
+    for day in data[category.replace('/', '-') + '-' + type]:
         points.append({
                 "measurement": type,
-                "time": datetime.fromisoformat(day['dateTime']),
+                "time": LOCAL_TIMEZONE.localize(datetime.fromisoformat(day['dateTime'])).astimezone(pytz.utc).isoformat(),
                 "fields": {
                     "value": float(day['value'])
                 }
@@ -287,6 +287,8 @@ fetch_data('activities', 'activityCalories')
 fetch_data('body', 'weight')
 fetch_data('body', 'fat')
 fetch_data('body', 'bmi')
+fetch_data('foods/log', 'water')
+fetch_data('foods/log', 'caloriesIn')
 fetch_heartrate(date.today().isoformat())
 fetch_activities(date.today().isoformat())
 
