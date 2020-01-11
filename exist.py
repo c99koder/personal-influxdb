@@ -174,7 +174,7 @@ for duration in list(durations.get_points()):
         date = datetime.fromisoformat(duration['time'].strip('Z') + "+00:00").astimezone(LOCAL_TIMEZONE).strftime('%Y-%m-%d')
         tags.append({'date': date, 'value': 'meditation'})
 
-durations = client.query('SELECT "duration" FROM "activity" WHERE activityName = \'Meditating\' AND time >= ' + start_time)
+durations = client.query('SELECT "duration" FROM "activity" WHERE activityName != \'Meditating\' AND time >= ' + start_time)
 for duration in list(durations.get_points()):
     if duration['duration'] > 0:
         date = datetime.fromisoformat(duration['time'].strip('Z') + "+00:00").astimezone(LOCAL_TIMEZONE).strftime('%Y-%m-%d')
