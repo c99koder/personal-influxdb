@@ -180,7 +180,7 @@ def fetch_activities(date):
                 fields[level['name'] + "ActiveMinutes"] = int(level['minutes'])
 
 
-        time = datetime.fromisoformat(activity['startTime'])
+        time = datetime.fromisoformat(activity['startTime'].strip("Z"))
         utc_time = time.astimezone(pytz.utc).isoformat()
         points.append({
             "measurement": "activity",
