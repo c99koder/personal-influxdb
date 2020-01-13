@@ -150,7 +150,7 @@ for result in data:
                 })
             else:
                 points.append({
-                    "measurement": result['group']['name'],
+                    "measurement": result['attribute'],
                     "time": value['date'] + "T00:00:00",
                     "fields": {
                         "value": value['value']
