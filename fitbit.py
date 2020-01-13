@@ -77,19 +77,33 @@ def fetch_heartrate(date):
 
         if 'heartRateZones' in day['value']:
             for zone in day['value']['heartRateZones']:
-                points.append({
-                        "measurement": "heartRateZones",
-                        "time": datetime.fromisoformat(day['dateTime']),
-                        "tags": {
-                            "zone": zone['name']
-                        },
-                        "fields": {
-                            "caloriesOut": float(zone['caloriesOut']),
-                            "min": float(zone['min']),
-                            "max": float(zone['max']),
-                            "minutes": float(zone['minutes'])
-                        }
-                    })
+                if 'caloriesOut' in zone and 'min' in zone and 'max' in zone and 'minutes' in zone:
+                    points.append({
+                            "measurement": "heartRateZones",
+                            "time": datetime.fromisoformat(day['dateTime']),
+                            "tags": {
+                                "zone": zone['name']
+                            },
+                            "fields": {
+                                "caloriesOut": float(zone['caloriesOut']),
+                                "min": float(zone['min']),
+                                "max": float(zone['max']),
+                                "minutes": float(zone['minutes'])
+                            }
+                        })
+                elif 'min' in zone and 'max' in zone and 'minutes' in zone:
+                    points.append({
+                            "measurement": "heartRateZones",
+                            "time": datetime.fromisoformat(day['dateTime']),
+                            "tags": {
+                                "zone": zone['name']
+                            },
+                            "fields": {
+                                "min": float(zone['min']),
+                                "max": float(zone['max']),
+                                "minutes": float(zone['minutes'])
+                            }
+                        })
 
     if 'activities-heart-intraday' in data:
         for value in data['activities-heart-intraday']['dataset']:
