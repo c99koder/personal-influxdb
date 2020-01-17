@@ -217,7 +217,7 @@ elif RESCUETIME_DATABASE != '':
     psl = PublicSuffixList()
     totals = {}
     client.switch_database(RESCUETIME_DATABASE)
-    durations = client.query('SELECT "duration","activity" FROM "activity" WHERE category = \'Games\' AND time >= ' + start_time)
+    durations = client.query('SELECT "duration","activity" FROM "activity" WHERE category = \'Games\' AND activity != \'Steam\' AND activity != \'steamwebhelper\' AND activity != \'origin\' AND activity != \'mixedrealityportal\' AND activity != \'holoshellapp\' AND activity != \'vrmonitor\' AND activity != \'vrserver\' AND activity != \'oculusclient\' AND activity != \'vive\' AND activity != \'obs64\' AND time >= ' + start_time)
     for duration in list(durations.get_points()):
         date = datetime.fromisoformat(duration['time'].strip('Z') + "+00:00").astimezone(LOCAL_TIMEZONE).strftime('%Y-%m-%d')
         if psl.get_public_suffix(duration['activity'], strict=True) is None:
