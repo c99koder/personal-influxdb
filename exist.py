@@ -221,7 +221,6 @@ elif RESCUETIME_DATABASE != '':
     for duration in list(durations.get_points()):
         date = datetime.fromisoformat(duration['time'].strip('Z') + "+00:00").astimezone(LOCAL_TIMEZONE).strftime('%Y-%m-%d')
         if psl.get_public_suffix(duration['activity'], strict=True) is None:
-            print(duration)
             if date in totals:
                 totals[date] = totals[date] + duration['duration']
             else:
