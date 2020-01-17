@@ -17,6 +17,7 @@ import requests, pytz, sys
 from datetime import datetime, date, timedelta, time
 from influxdb import InfluxDBClient
 from influxdb.exceptions import InfluxDBClientError
+from publicsuffix2 import PublicSuffixList
 
 LOCAL_TIMEZONE = pytz.timezone('America/New_York')
 EXIST_ACCESS_TOKEN = ''
@@ -29,6 +30,7 @@ INFLUXDB_DATABASE = 'exist'
 FITBIT_DATABASE = ''
 TRAKT_DATABASE = ''
 GAMING_DATABASE = ''
+RESCUETIME_DATABASE = ''
 points = []
 start_time = str(int(LOCAL_TIMEZONE.localize(datetime.combine(date.today(), time(0,0)) - timedelta(days=7)).astimezone(pytz.utc).timestamp()) * 1000) + 'ms'
 
@@ -210,6 +212,23 @@ if GAMING_DATABASE != '':
 
     for date in totals:
         values.append({'date': date, 'name': 'gaming_min', 'value': int(totals[date] / 60)})
+        tags.append({'date': date, 'value': 'gaming'})
+elif RESCUETIME_DATABASE != '':
+    psl = PublicSuffixList()
+    totals = {}
+    client.switch_database(RESCUETIME_DATABASE)
+    durations = client.query('SELECT "duration","activity" FROM "activity" WHERE category = \'Games\' AND time >= ' + start_time)
+    for duration in list(durations.get_points()):
+        date = datetime.fromisoformat(duration['time'].strip('Z') + "+00:00").astimezone(LOCAL_TIMEZONE).strftime('%Y-%m-%d')
+        if psl.get_public_suffix(duration['activity'], strict=True) is None:
+            print(duration)
+            if date in totals:
+                totals[date] = totals[date] + duration['duration']
+            else:
+                totals[date] = duration['duration']
+
+    for date in totals:
+        values.append({'date': date, 'name': 'gaming_min', 'duration': int(totals[date] / 60)})
         tags.append({'date': date, 'value': 'gaming'})
 
 if len(tags) > 0:

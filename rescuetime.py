@@ -68,7 +68,6 @@ for activity in activities['rows']:
 try:
     time = datetime.fromisoformat(activities['rows'][0][0])
     utc_time = LOCAL_TIMEZONE.localize(time).astimezone(pytz.utc).isoformat()
-    client.query("DELETE WHERE time >= $start", bind_params={"start": utc_time});
     client.write_points(points)
 except InfluxDBClientError as err:
     print("Unable to write points to InfluxDB: %s" % (err))
