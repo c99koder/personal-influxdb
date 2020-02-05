@@ -11,7 +11,7 @@ Open each Python script and set your API credentials and InfluxDB server configu
 * __Nintendo Switch__: You'll need to set up [mitmproxy](https://mitmproxy.org/) and intercept the Nintendo Switch Parent Controls app on an iOS or Android device to grab your authentication tokens and device IDs
 * __Xbox Live__: Register a profile at https://www.trueachievements.com/ and link it to your Xbox account. You can get your ID number by clicking your "TrueAchievement Points" score on your profile and looking at the leaderboard URL, it will be the `findgamerid` parameter.
 * __Google Play Games__: Download your Google Play Games archive from https://takeout.google.com/ and extract it in the same folder as the script
-* __Todoist__: Create an app at https://developer.todoist.com/appconsole.html and generate a test token
+* __Todoist__: *Access to the API requires a Todoist Premium subscription* Create an app at https://developer.todoist.com/appconsole.html and generate a test token
 * __GitHub__: Create a personal access token at https://github.com/settings/tokens
 * __Trakt.tv__: Register for an API key at https://trakt.tv/oauth/applications and generate an OAuth2 access token, you'll also need to create an API key at https://www.themoviedb.org/settings/api to download movie / show posters
 * __EDSM__: Generate an API key at https://www.edsm.net/en/settings/api
@@ -31,10 +31,12 @@ $ pip3 install pytz influxdb requests requests-cache instaloader todoist-python 
 Run each Python script from the terminal and it will insert the most recent data into InfluxDB.
 
 ## Notes
+* Each script is designed to write to its own InfluxDB database.  Using the same database name between scripts can lead to data being unexpectedly overwritten or deleted.
 * RescueTime provides data each hour, so scheduling the script as an hourly cron job is recommended.
 * Steam provides the recent playtime over 2 weeks, so the first set of data inserted will contain 2 weeks of time.  New data going forward will be more accurate as the script will calculate the time since the last run.
 * Google Play doesn't provide total play time, only achievements and last played timestamps
 * Instagram can take a very long time to download, so by default it will only fetch the 10 most recent posts.  Set `MAX_POSTS` to `0` to download everything.
+* Access to the Todoist API requires a premium subscription
 
 ## Grafana Dashboards
 The [grafana](grafana/) folder contains json files for various example dashboards.
