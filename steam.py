@@ -60,7 +60,7 @@ def fetch_recents():
         return []
 
 def scrape_recents():
-    response = requests.get('https://steamcommunity.com/id/c99koder/games/?tab=all')
+    response = requests.get('https://steamcommunity.com/id/' + STEAM_USERNAME + '/games/?tab=all')
     soup = BeautifulSoup(response.text, 'html.parser')
     data = soup.find('script', string=re.compile('var rgGames = \[\{')).string
     return json.loads(data[data.index('['):data.index('}}];') + 3])
