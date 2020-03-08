@@ -304,7 +304,7 @@ fetch_data('body', 'bmi')
 fetch_data('foods/log', 'water')
 fetch_data('foods/log', 'caloriesIn')
 fetch_heartrate(date.today().isoformat())
-fetch_activities(date.today().isoformat())
+fetch_activities((date.today() + timedelta(days=1)).isoformat())
 
 try:
     client.write_points(points)
