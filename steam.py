@@ -73,7 +73,7 @@ except InfluxDBClientError as err:
     print("InfluxDB connection failed: %s" % (err))
     sys.exit()
 
-totals = client.query('SELECT last("total") AS "total" FROM "time" WHERE "platform" = \'Steam\' AND "total" > 0 GROUP BY "application_id" ORDER BY "time" DESC')
+totals = client.query('SELECT last("total") AS "total" FROM "time" WHERE "platform" = \'Steam\' AND "total" > 0 AND "player_id" = \'' + STEAM_ID + '\' GROUP BY "application_id" ORDER BY "time" DESC')
 recents = scrape_recents()
 
 for app in fetch_recents():
