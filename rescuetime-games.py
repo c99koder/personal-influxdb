@@ -111,6 +111,12 @@ games = {
     "platform": "Viveport",
     "url": 'https://store.steampowered.com/app/770110/'
   },
+  "Solitaire": {
+    "image": 'https://lh3.googleusercontent.com/trsFOWkeuVbmN40ss88nfXDxXcOiH1IF3oJJOueRvcrQEf0gMYsTCzGbC6C-kgqZow=s180-rw',
+    "title": "Solitaire",
+    "platform": "Android",
+    "url": 'https://play.google.com/store/apps/details?id=com.mobilityware.solitaire'
+  },
 }
 points = []
 start_time = str(int(LOCAL_TIMEZONE.localize(datetime.combine(date.today(), time(0,0)) - timedelta(days=7)).astimezone(pytz.utc).timestamp()) * 1000) + 'ms'
