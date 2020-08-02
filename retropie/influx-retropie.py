@@ -26,17 +26,17 @@ INFLUXDB_PASSWORD = 'root'
 GAMING_DATABASE = 'gaming'
 
 f = open('/run/shm/influx-retropie', 'r')
-start = datetime.fromtimestamp(int(f.readline().strip()))
+start = datetime.utcfromtimestamp(int(f.readline().strip()))
 platform = f.readline().strip()
 emulator = f.readline().strip()
 rom = name = os.path.basename(f.readline().strip())
-end = datetime.fromtimestamp(int(f.readline().strip()))
+end = datetime.utcfromtimestamp(int(f.readline().strip()))
 duration = (end - start).seconds
 f.close()
 
 if not rom:
 	rom = name = emulator
-	platform = "ports"
+	platform = "Linux"
 
 #Ignore games played less than 60 seconds
 if duration < 60:
@@ -76,8 +76,6 @@ elif platform == "pc":
 	platform = "MS-DOS"
 elif platform == "scummvm":
 	platform = "ScummVM"
-elif platform == "ports":
-	platform = "Linux"
 elif platform == "mame-libretro":
 	platform = "Arcade"
 elif platform == "mastersystem":
@@ -85,18 +83,42 @@ elif platform == "mastersystem":
 else:
 	platform = platform.capitalize()
 
-points = [{
-	"measurement": "time",
-	"time": start,
-	"tags": {
-		"application_id": rom,
-		"platform": platform,
-		"title": name,
-	},
-	"fields": {
-		"value": duration,
-	}
-}]
+url = ""
+image = ""
+
+if name == "openttd":
+	name = "OpenTTD"
+	url = "https://www.openttd.org"
+	image = "https://www.openttd.org/static/img/layout/openttd-128.gif"
+
+if url and image:
+	points = [{
+		"measurement": "time",
+		"time": start,
+		"tags": {
+			"application_id": rom,
+			"platform": platform,
+			"title": name,
+		},
+		"fields": {
+			"value": duration,
+			"image": image,
+			"url": url
+		}
+	}]
+else:
+	points = [{
+		"measurement": "time",
+		"time": start,
+		"tags": {
+			"application_id": rom,
+			"platform": platform,
+			"title": name,
+		},
+		"fields": {
+			"value": duration
+		}
+	}]
 
 try:
     client = InfluxDBClient(host=INFLUXDB_HOST, port=INFLUXDB_PORT, username=INFLUXDB_USERNAME, password=INFLUXDB_PASSWORD)
