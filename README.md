@@ -16,6 +16,7 @@ Open each Python script and set your API credentials and InfluxDB server configu
 * __Trakt.tv__: Register for an API key at https://trakt.tv/oauth/applications and generate an OAuth2 access token, you'll also need to create an API key at https://www.themoviedb.org/settings/api to download movie / show posters
 * __EDSM__: Generate an API key at https://www.edsm.net/en/settings/api
 * __Exist__: Register an app at https://exist.io/account/apps/
+* __RetroPie__: Place the shell files and python script into user `pi`'s home directory. Created or edit `/opt/retropie/configs/all/runcommand-onstart.sh` and append the line `bash "/home/pi/influx-onstart.sh" "$@"`. Create or edit `/opt/retropie/configs/all/runcommand-onend.sh` and append the line `bash "/home/pi/influx-onend.sh" "$@"`
 
 ## Usage
 Check your Python version and make sure version 3.7 or newer is installed on your system:

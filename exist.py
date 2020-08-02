@@ -171,13 +171,13 @@ values = []
 tags = []
 if FITBIT_DATABASE != '':
     client.switch_database(FITBIT_DATABASE)
-    durations = client.query('SELECT "duration" FROM "activity" WHERE activityName = \'Meditating\' AND time >= ' + start_time)
+    durations = client.query('SELECT "duration" FROM "activity" WHERE (activityName = \'Meditating\' OR activityName = \'Meditation\')AND time >= ' + start_time)
     for duration in list(durations.get_points()):
         if duration['duration'] > 0:
             date = datetime.fromisoformat(duration['time'].strip('Z') + "+00:00").astimezone(LOCAL_TIMEZONE).strftime('%Y-%m-%d')
             tags.append({'date': date, 'value': 'meditation'})
 
-    durations = client.query('SELECT "duration","activityName" FROM "activity" WHERE activityName != \'Meditating\' AND time >= ' + start_time)
+    durations = client.query('SELECT "duration","activityName" FROM "activity" WHERE activityName != \'Meditating\' AND activityName != \'Meditation\' AND time >= ' + start_time)
     for duration in list(durations.get_points()):
         if duration['duration'] > 0:
             date = datetime.fromisoformat(duration['time'].strip('Z') + "+00:00").astimezone(LOCAL_TIMEZONE).strftime('%Y-%m-%d')
