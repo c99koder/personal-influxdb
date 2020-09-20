@@ -117,6 +117,24 @@ games = {
     "platform": "Android",
     "url": 'https://play.google.com/store/apps/details?id=com.mobilityware.solitaire'
   },
+  "flightsimulator": {
+    "image": 'https://steamcdn-a.akamaihd.net/steam/apps/1250410/header.jpg',
+    "title": "Microsoft Flight Simulator",
+    "platform": "Windows",
+    "url": 'https://store.steampowered.com/app/1250410/'
+  },
+  "movingout": {
+    "image": 'https://steamcdn-a.akamaihd.net/steam/apps/996770/header.jpg',
+    "title": "Moving Out",
+    "platform": "Windows",
+    "url": 'https://store.steampowered.com/app/996770/'
+  },
+  "cengine": {
+    "image": 'https://store-images.s-microsoft.com/image/apps.53972.13524928534337711.061b795b-d8df-4621-98ec-a96089e571a1.51af2134-99b3-46b4-bdd9-7c7f29c0655e?mode=scale&q=90&h=300&w=200',
+    "title": "The Touryst",
+    "platform": "Windows",
+    "url": 'https://www.microsoft.com/en-us/p/the-touryst/9n9w1jk1x5qj'
+  },
 }
 points = []
 start_time = str(int(LOCAL_TIMEZONE.localize(datetime.combine(date.today(), time(0,0)) - timedelta(days=7)).astimezone(pytz.utc).timestamp()) * 1000) + 'ms'
