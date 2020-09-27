@@ -77,6 +77,9 @@ $ grafana-cli --pluginUrl https://packages.hiveeyes.org/grafana/grafana-map-pane
 ### Exist dashboard
 ![Grafana Exist Screenshot](https://raw.githubusercontent.com/c99koder/personal-influxdb/master/screenshots/grafana-exist.png)
 
+### FsHub.io dashboard
+![Grafana FsHub.io Screenshot](https://raw.githubusercontent.com/c99koder/personal-influxdb/master/screenshots/grafana-fshub.png)
+
 # License
 
 Copyright (C) 2020 Sam Steele. Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
