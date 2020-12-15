@@ -41,88 +41,89 @@ def fetch(limit, cursor):
     print("Got flights %s from FsHub" % (len(data['data'])))
 
     for flight in data['data']:
-        points.append({
-            "measurement": "flight",
-            "time": flight['departure']['time'],
-            "tags": {
-                "flight_id": flight['id'],
-                "pilot_id": flight['user']['id']
-            },
-            "fields": {
-                "aircraft": flight['aircraft']['name'],
-                "fuel_used": flight['fuel_used'],
-                "landing_rate": flight['landing_rate'],
-                "distance_nm": flight['distance']['nm'],
-                "distance_km": flight['distance']['km'],
-                "max_alt": flight['max']['alt'],
-                "max_spd": flight['max']['spd'],
-                "duration": flight['time'],
-                "departure_icao": flight['departure']['icao'],
-                "departure_iata": flight['departure']['iata'],
-                "departure_name": flight['departure']['name'],
-                "departure_time": flight['departure']['time'],
-                "departure_lat": flight['departure']['geo']['lat'],
-                "departure_long": flight['departure']['geo']['lng'],
-                "departure_hdg_mag": flight['departure']['hdg']['mag'],
-                "departure_hdg_true": flight['departure']['hdg']['true'],
-                "departure_spd": flight['departure']['spd']['tas'],
-                "depature_fuel": flight['departure']['fuel'],
-                "depature_pitch": flight['departure']['pitch'],
-                "depature_bank": flight['departure']['bank'],
-                "depature_wind_spd": flight['departure']['wind']['spd'],
-                "depature_wind_dir": flight['departure']['wind']['dir'],
-                "departure_url": "https://fshub.io/airport/" + flight['departure']['icao'].upper(),
-                "arrival_icao": flight['arrival']['icao'],
-                "arrival_iata": flight['arrival']['iata'],
-                "arrival_name": flight['arrival']['name'],
-                "arrival_time": flight['arrival']['time'],
-                "arrival_lat": flight['arrival']['geo']['lat'],
-                "arrival_long": flight['arrival']['geo']['lng'],
-                "arrival_hdg_mag": flight['arrival']['hdg']['mag'],
-                "arrival_hdg_true": flight['arrival']['hdg']['true'],
-                "arrival_spd": flight['arrival']['spd']['tas'],
-                "arrival_fuel": flight['arrival']['fuel'],
-                "arrival_pitch": flight['arrival']['pitch'],
-                "arrival_bank": flight['arrival']['bank'],
-                "arrival_wind_spd": flight['arrival']['wind']['spd'],
-                "arrival_wind_dir": flight['arrival']['wind']['dir'],
-                "arrival_url": "https://fshub.io/airport/" + flight['arrival']['icao'].upper(),
-                "flight_url": "https://fshub.io/flight/" + str(flight['id']),
-                "pilot_url": "https://fshub.io/pilot/" + str(flight['user']['id'])
-            }
-        })
-        points.append({
-            "measurement": "airport",
-            "time": flight['departure']['time'],
-            "tags": {
-                "flight_id": flight['id'],
-                "pilot_id": flight['user']['id'],
-                "icao": flight['departure']['icao'],
-                "iata": flight['departure']['iata']
-            },
-            "fields": {
-                "name": flight['departure']['name'],
-                "lat": flight['departure']['geo']['lat'],
-                "long": flight['departure']['geo']['lng'],
-                "url": "https://fshub.io/airport/" + flight['departure']['icao'].upper()
-            }
-        })
-        points.append({
-            "measurement": "airport",
-            "time": flight['arrival']['time'],
-            "tags": {
-                "flight_id": flight['id'],
-                "pilot_id": flight['user']['id'],
-                "icao": flight['arrival']['icao'],
-                "iata": flight['arrival']['iata']
-            },
-            "fields": {
-                "name": flight['arrival']['name'],
-                "lat": flight['arrival']['geo']['lat'],
-                "long": flight['arrival']['geo']['lng'],
-                "url": "https://fshub.io/airport/" + flight['arrival']['icao'].upper()
-            }
-        })
+        if flight['departure']['icao'] != None and flight['arrival']['icao'] != None:
+            points.append({
+                "measurement": "flight",
+                "time": flight['departure']['time'],
+                "tags": {
+                    "flight_id": flight['id'],
+                    "pilot_id": flight['user']['id']
+                },
+                "fields": {
+                    "aircraft": flight['aircraft']['name'],
+                    "fuel_used": flight['fuel_used'],
+                    "landing_rate": flight['landing_rate'],
+                    "distance_nm": flight['distance']['nm'],
+                    "distance_km": flight['distance']['km'],
+                    "max_alt": flight['max']['alt'],
+                    "max_spd": flight['max']['spd'],
+                    "duration": flight['time'],
+                    "departure_icao": flight['departure']['icao'],
+                    "departure_iata": flight['departure']['iata'],
+                    "departure_name": flight['departure']['name'],
+                    "departure_time": flight['departure']['time'],
+                    "departure_lat": flight['departure']['geo']['lat'],
+                    "departure_long": flight['departure']['geo']['lng'],
+                    "departure_hdg_mag": flight['departure']['hdg']['mag'],
+                    "departure_hdg_true": flight['departure']['hdg']['true'],
+                    "departure_spd": flight['departure']['spd']['tas'],
+                    "depature_fuel": flight['departure']['fuel'],
+                    "depature_pitch": flight['departure']['pitch'],
+                    "depature_bank": flight['departure']['bank'],
+                    "depature_wind_spd": flight['departure']['wind']['spd'],
+                    "depature_wind_dir": flight['departure']['wind']['dir'],
+                    "departure_url": "https://fshub.io/airport/" + flight['departure']['icao'].upper(),
+                    "arrival_icao": flight['arrival']['icao'],
+                    "arrival_iata": flight['arrival']['iata'],
+                    "arrival_name": flight['arrival']['name'],
+                    "arrival_time": flight['arrival']['time'],
+                    "arrival_lat": flight['arrival']['geo']['lat'],
+                    "arrival_long": flight['arrival']['geo']['lng'],
+                    "arrival_hdg_mag": flight['arrival']['hdg']['mag'],
+                    "arrival_hdg_true": flight['arrival']['hdg']['true'],
+                    "arrival_spd": flight['arrival']['spd']['tas'],
+                    "arrival_fuel": flight['arrival']['fuel'],
+                    "arrival_pitch": flight['arrival']['pitch'],
+                    "arrival_bank": flight['arrival']['bank'],
+                    "arrival_wind_spd": flight['arrival']['wind']['spd'],
+                    "arrival_wind_dir": flight['arrival']['wind']['dir'],
+                    "arrival_url": "https://fshub.io/airport/" + flight['arrival']['icao'].upper(),
+                    "flight_url": "https://fshub.io/flight/" + str(flight['id']),
+                    "pilot_url": "https://fshub.io/pilot/" + str(flight['user']['id'])
+                }
+            })
+            points.append({
+                "measurement": "airport",
+                "time": flight['departure']['time'],
+                "tags": {
+                    "flight_id": flight['id'],
+                    "pilot_id": flight['user']['id'],
+                    "icao": flight['departure']['icao'],
+                    "iata": flight['departure']['iata']
+                },
+                "fields": {
+                    "name": flight['departure']['name'],
+                    "lat": flight['departure']['geo']['lat'],
+                    "long": flight['departure']['geo']['lng'],
+                    "url": "https://fshub.io/airport/" + flight['departure']['icao'].upper()
+                }
+            })
+            points.append({
+                "measurement": "airport",
+                "time": flight['arrival']['time'],
+                "tags": {
+                    "flight_id": flight['id'],
+                    "pilot_id": flight['user']['id'],
+                    "icao": flight['arrival']['icao'],
+                    "iata": flight['arrival']['iata']
+                },
+                "fields": {
+                    "name": flight['arrival']['name'],
+                    "lat": flight['arrival']['geo']['lat'],
+                    "long": flight['arrival']['geo']['lng'],
+                    "url": "https://fshub.io/airport/" + flight['arrival']['icao'].upper()
+                }
+            })
     if data['meta']['cursor']['count'] == limit:
         return data['meta']['cursor']['next']
     else:
