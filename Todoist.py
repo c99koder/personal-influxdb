@@ -58,20 +58,27 @@ projects = {}
 for event in activity:
 	if event['object_type'] == 'item':
 		if event['event_type'] == 'added' or event['event_type'] == 'completed':
-			if event['parent_project_id'] in projects:
-				project = projects[event['parent_project_id']]
-			else:
-				project = api.projects.get(event['parent_project_id'])
-				projects[event['parent_project_id']] = project
+			project = None
+			projectName = None
+			try:
+				if event['parent_project_id'] in projects:
+					project = projects[event['parent_project_id']]
+				else:
+					project = api.projects.get(event['parent_project_id'])
+					projects[event['parent_project_id']] = project
+				projectName = project['project']['name']
+			except AttributeError as err:
+				print("Unable to fetch name for project ID %s" % event['parent_project_id'])
+				projectName = "unknown_" + str(event['parent_project_id'])
 
-			if project != None:
+			if projectName != None:
 				points.append({
 			            "measurement": event['event_type'],
 			            "time": event['event_date'],
 			            "tags": {
 			                "item_id": event['id'],
 			                "project_id": event['parent_project_id'],
-			                "project_name": project['project']['name'],
+			                "project_name": projectName,
 			            },
 			            "fields": {
 			                "content": event['extra_data']['content']
