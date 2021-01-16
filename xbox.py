@@ -45,7 +45,7 @@ for row in table.find_all('tr'):
         if row.find('td', class_='date').string != 'Offline':
             date = datetime.strptime(row.find('td', class_='date').string, '%d %b %y')
             game = row.find('td', class_='gamethumb').find('img')['alt']
-            icon = 'http:' + row.find('td', class_='achthumb').find('img')['src'].replace('/thumbs/', '/')
+            icon = 'https://www.trueachievements.com' + row.find('td', class_='achthumb').find('img')['src'].replace('/thumbs/', '/')
             achievement = row.find('td', class_='wideachievement').find('a').string
             description = list(row.find('td', class_='wideachievement').find('span').stripped_strings)[0]
             apiname = re.search('(?<=/)\w+', row.find('td', class_='achthumb').find('a')['href'])[0]
