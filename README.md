@@ -7,7 +7,7 @@ Open each Python script and set your API credentials and InfluxDB server configu
 * __RescueTime__: Register for an API key at https://www.rescuetime.com/anapi/manage
 * __Foursquare__: Register an app at https://foursquare.com/developers/ and generate an OAuth2 access token
 * __Fitbit__: Register a "Personal" app at https://dev.fitbit.com/ and generate an OAuth2 access token
-* __Steam__: Register for an API key at https://steamcommunity.com/dev/apikey
+* __Steam__: Register for an API key at https://steamcommunity.com/dev/apikey and look up your SteamID at https://steamidfinder.com/ (use the `steamID64 (Dec)` value)
 * __Nintendo Switch__: You'll need to set up [mitmproxy](https://mitmproxy.org/) and intercept the Nintendo Switch Parent Controls app on an iOS or Android device to grab your authentication tokens and device IDs
 * __Xbox Live__: Register a profile at https://www.trueachievements.com/ and link it to your Xbox account. You can get your ID number by clicking your "TrueAchievement Points" score on your profile and looking at the leaderboard URL, it will be the `findgamerid` parameter.
 * __Google Play Games__: Download your Google Play Games archive from https://takeout.google.com/ and extract it in the same folder as the script
