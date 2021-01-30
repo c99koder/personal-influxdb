@@ -229,6 +229,32 @@ if not FITBIT_ACCESS_TOKEN:
     f.write(refresh_token)
     f.close()
 
+try:
+    response = requests.get('https://api.fitbit.com/1/user/-/devices.json', 
+        headers={'Authorization': 'Bearer ' + FITBIT_ACCESS_TOKEN, 'Accept-Language': FITBIT_LANGUAGE})
+    response.raise_for_status()
+except requests.exceptions.HTTPError as err:
+    print("HTTP request failed: %s" % (err))
+    sys.exit()
+
+data = response.json()
+print("Got devices from Fitbit")
+
+for device in data:
+    points.append({
+        "measurement": "deviceBatteryLevel",
+        "time": LOCAL_TIMEZONE.localize(datetime.fromisoformat(device['lastSyncTime'])).astimezone(pytz.utc).isoformat(),
+        "tags": {
+            "id": device['id'],
+            "deviceVersion": device['deviceVersion'],
+            "type": device['type'],
+            "mac": device['mac'],
+        },
+        "fields": {
+            "value": float(device['batteryLevel'])
+        }
+    })
+
 end = date.today()
 start = end - timedelta(days=1)
 
