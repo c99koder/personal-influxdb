@@ -169,6 +169,8 @@ add_rank(data, "Explore")
 add_rank(data, "CQC")
 add_rank(data, "Federation")
 add_rank(data, "Empire")
+add_rank(data, "Soldier")
+add_rank(data, "Exobiologist")
 
 requests_cache.install_cache('edsm')
 data = fetch_jumps(date.today().isoformat() + " 00:00:00")
