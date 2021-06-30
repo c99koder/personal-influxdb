@@ -30,6 +30,11 @@ INFLUXDB_PASSWORD = 'root'
 INFLUXDB_DATABASE = 'gaming'
 points = []
 
+# These occasionally need to be updated when Nintendo changes the minimum allowed version
+INTERNAL_VERSION = '303'
+DISPLAY_VERSION = '1.15.0'
+OS_VERSION = '14.2'
+
 def get_access_token():
     response = requests.post('https://accounts.nintendo.com/connect/1.0.0/api/token', data={
         'session_token': SESSION_TOKEN,
@@ -44,15 +49,15 @@ def get_daily_summary(access):
         'x-moon-os-language': 'en-US',
         'x-moon-app-language': 'en-US',
         'authorization': access['token_type'] + ' ' + access['access_token'],
-        'x-moon-app-internal-version': '293',
-        'x-moon-app-display-version': '1.14.0',
+        'x-moon-app-internal-version': INTERNAL_VERSION,
+        'x-moon-app-display-version': DISPLAY_VERSION,
         'x-moon-app-id': 'com.nintendo.znma',
         'x-moon-os': 'IOS',
-        'x-moon-os-version': '14.2',
+        'x-moon-os-version': OS_VERSION,
         'x-moon-model': 'iPhone11,8',
         'accept-encoding': 'gzip;q=1.0, compress;q=0.5',
         'accept-language': 'en-US;q=1.0',
-        'user-agent': 'moon_ios/1.14.0 (com.nintendo.znma; build:293; iOS 14.2.0) Alamofire/4.8.2',
+        'user-agent': 'moon_ios/' + DISPLAY_VERSION + ' (com.nintendo.znma; build:' + INTERNAL_VERSION + '; iOS ' + OS_VERSION + ') Alamofire/4.8.2',
         'x-moon-timezone': 'America/Los_Angeles',
         'x-moon-smart-device-id': SMART_DEVICE_ID
     })
@@ -63,15 +68,15 @@ def get_monthly_summary(month, access):
         'x-moon-os-language': 'en-US',
         'x-moon-app-language': 'en-US',
         'authorization': access['token_type'] + ' ' + access['access_token'],
-        'x-moon-app-internal-version': '293',
-        'x-moon-app-display-version': '1.14.0',
+        'x-moon-app-internal-version': INTERNAL_VERSION,
+        'x-moon-app-display-version': DISPLAY_VERSION,
         'x-moon-app-id': 'com.nintendo.znma',
         'x-moon-os': 'IOS',
-        'x-moon-os-version': '14.2',
+        'x-moon-os-version': OS_VERSION,
         'x-moon-model': 'iPhone11,8',
         'accept-encoding': 'gzip;q=1.0, compress;q=0.5',
         'accept-language': 'en-US;q=1.0',
-        'user-agent': 'moon_ios/1.14.0 (com.nintendo.znma; build:293; iOS 14.2.0) Alamofire/4.8.2',
+        'user-agent': 'moon_ios/' + DISPLAY_VERSION + ' (com.nintendo.znma; build:' + INTERNAL_VERSION + '; iOS ' + OS_VERSION + ') Alamofire/4.8.2',
         'x-moon-timezone': 'America/Los_Angeles',
         'x-moon-smart-device-id': SMART_DEVICE_ID
     })
