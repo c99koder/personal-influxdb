@@ -86,7 +86,7 @@ for core in os.listdir(RETROARCH_LOGS):
 					"fields": {
 						"value": int(value),
 						"total": runtime,
-						"image": IMAGE_WEB_PREFIX + urllib.parse.quote_plus(rom['path']) + '/' + urllib.parse.quote_plus(rom['key']) + '.png',
+						"image": IMAGE_WEB_PREFIX + urllib.parse.quote(rom['path']) + '/' + urllib.parse.quote(rom['key']) + '.png',
 						"url": 'https://thegamesdb.net/search.php?name=' + urllib.parse.quote_plus(rom['name'])
 					}
 			    })
@@ -97,5 +97,4 @@ except InfluxDBClientError as err:
     print("Unable to write points to InfluxDB: %s" % (err))
     sys.exit()
 
-print(points)
 print("Successfully wrote %s data points to InfluxDB" % (len(points)))
