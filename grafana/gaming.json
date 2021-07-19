@@ -14,18 +14,18 @@
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
-      "version": "6.5.1"
+      "version": "8.0.4"
     },
     {
       "type": "panel",
       "id": "grafana-piechart-panel",
-      "name": "Pie Chart",
-      "version": "1.3.9"
+      "name": "Pie Chart (old)",
+      "version": "1.6.2"
     },
     {
       "type": "panel",
       "id": "graph",
-      "name": "Graph",
+      "name": "Graph (old)",
       "version": ""
     },
     {
@@ -36,8 +36,8 @@
     },
     {
       "type": "panel",
-      "id": "table",
-      "name": "Table",
+      "id": "table-old",
+      "name": "Table (old)",
       "version": ""
     }
   ],
@@ -91,7 +91,6 @@
       "links": [],
       "maxDataPoints": 3,
       "nullPointMode": "connected",
-      "options": {},
       "pieType": "pie",
       "strokeWidth": 1,
       "targets": [
@@ -161,7 +160,7 @@
       "legend": {
         "header": "Time Played",
         "show": true,
-        "sort": "current",
+        "sort": "total",
         "sortDesc": true,
         "values": true
       },
@@ -169,7 +168,6 @@
       "links": [],
       "maxDataPoints": 3,
       "nullPointMode": "connected",
-      "options": {},
       "pieType": "pie",
       "strokeWidth": 1,
       "targets": [
@@ -195,6 +193,10 @@
                   "value"
                 ],
                 "type": "field"
+              },
+              {
+                "params": [],
+                "type": "sum"
               }
             ]
           ],
@@ -211,7 +213,7 @@
       "timeShift": null,
       "title": "Time Per Platform",
       "type": "grafana-piechart-panel",
-      "valueName": "current"
+      "valueName": "total"
     },
     {
       "aliasColors": {},
@@ -219,6 +221,12 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "${DS_GAMING}",
+      "fieldConfig": {
+        "defaults": {
+          "links": []
+        },
+        "overrides": []
+      },
       "fill": 4,
       "fillGradient": 10,
       "gridPos": {
@@ -243,9 +251,10 @@
       "linewidth": 2,
       "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "8.0.4",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -255,13 +264,19 @@
       "steppedLine": false,
       "targets": [
         {
-          "alias": "Steam",
+          "alias": "$tag_platform",
           "groupBy": [
             {
               "params": [
                 "1d"
               ],
               "type": "time"
+            },
+            {
+              "params": [
+                "platform"
+              ],
+              "type": "tag"
             }
           ],
           "measurement": "achievement",
@@ -283,87 +298,7 @@
               }
             ]
           ],
-          "tags": [
-            {
-              "key": "platform",
-              "operator": "=",
-              "value": "Steam"
-            }
-          ]
-        },
-        {
-          "alias": "Xbox Live",
-          "groupBy": [
-            {
-              "params": [
-                "1d"
-              ],
-              "type": "time"
-            }
-          ],
-          "measurement": "achievement",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "refId": "B",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "name"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "count"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "platform",
-              "operator": "=",
-              "value": "Xbox Live"
-            }
-          ]
-        },
-        {
-          "alias": "Google Play",
-          "groupBy": [
-            {
-              "params": [
-                "1d"
-              ],
-              "type": "time"
-            }
-          ],
-          "measurement": "achievement",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "refId": "C",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "name"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "count"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "platform",
-              "operator": "=",
-              "value": "Google Play"
-            }
-          ]
+          "tags": []
         }
       ],
       "thresholds": [],
@@ -386,6 +321,7 @@
       },
       "yaxes": [
         {
+          "$$hashKey": "object:87",
           "format": "locale",
           "label": null,
           "logBase": 1,
@@ -394,6 +330,7 @@
           "show": true
         },
         {
+          "$$hashKey": "object:88",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -418,7 +355,6 @@
         "y": 9
       },
       "id": 2,
-      "options": {},
       "pageSize": null,
       "showHeader": true,
       "sort": {
@@ -428,12 +364,14 @@
       "styles": [
         {
           "alias": "Date",
+          "align": "auto",
           "dateFormat": "YYYY-MM-DD",
           "pattern": "Time",
           "type": "date"
         },
         {
           "alias": "Time Played",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -450,6 +388,7 @@
         },
         {
           "alias": "Game",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -466,6 +405,7 @@
         },
         {
           "alias": "Platform",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -516,7 +456,7 @@
       "timeShift": null,
       "title": "Recent Games",
       "transform": "table",
-      "type": "table"
+      "type": "table-old"
     },
     {
       "columns": [],
@@ -529,7 +469,6 @@
         "y": 9
       },
       "id": 4,
-      "options": {},
       "pageSize": null,
       "showHeader": true,
       "sort": {
@@ -539,12 +478,14 @@
       "styles": [
         {
           "alias": "Time",
+          "align": "auto",
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "pattern": "Time",
           "type": "date"
         },
         {
           "alias": "Game",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -561,6 +502,7 @@
         },
         {
           "alias": "Achievement",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -577,6 +519,7 @@
         },
         {
           "alias": "Description",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -593,6 +536,7 @@
         },
         {
           "alias": "Platform",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -657,22 +601,35 @@
       "timeShift": null,
       "title": "Recent Achievements",
       "transform": "table",
-      "type": "table"
+      "type": "table-old"
     }
   ],
-  "schemaVersion": 21,
+  "schemaVersion": 30,
   "style": "dark",
   "tags": [],
   "templating": {
     "list": []
   },
   "time": {
-    "from": "now-1y",
+    "from": "now-90d",
     "to": "now"
   },
-  "timepicker": {},
-  "timezone": "",
+  "timepicker": {
+    "refresh_intervals": [
+      "5s",
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "30m",
+      "1h",
+      "2h",
+      "1d"
+    ]
+  },
+  "timezone": "utc",
   "title": "Gaming",
   "uid": "TIAeUxgRk",
-  "version": 17
+  "version": 20
 }

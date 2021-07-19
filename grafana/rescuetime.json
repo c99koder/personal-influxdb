@@ -13,25 +13,19 @@
     {
       "type": "panel",
       "id": "bargauge",
-      "name": "Bar Gauge",
+      "name": "Bar gauge",
       "version": ""
     },
     {
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
-      "version": "6.5.1"
-    },
-    {
-      "type": "panel",
-      "id": "grafana-piechart-panel",
-      "name": "Pie Chart",
-      "version": "1.3.9"
+      "version": "8.0.4"
     },
     {
       "type": "panel",
       "id": "graph",
-      "name": "Graph",
+      "name": "Graph (old)",
       "version": ""
     },
     {
@@ -42,14 +36,20 @@
     },
     {
       "type": "panel",
-      "id": "singlestat",
-      "name": "Singlestat",
+      "id": "piechart",
+      "name": "Pie chart",
       "version": ""
     },
     {
       "type": "panel",
-      "id": "table",
-      "name": "Table",
+      "id": "stat",
+      "name": "Stat",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "table-old",
+      "name": "Table (old)",
       "version": ""
     }
   ],
@@ -74,6 +74,10 @@
   "panels": [
     {
       "datasource": null,
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -86,21 +90,35 @@
     },
     {
       "cacheTimeout": null,
-      "colorBackground": false,
-      "colorValue": true,
-      "colors": [
-        "#299c46",
-        "#37872D",
-        "#37872D"
-      ],
       "datasource": "${DS_RESCUETIME}",
-      "format": "dthms",
-      "gauge": {
-        "maxValue": 100,
-        "minValue": 0,
-        "show": false,
-        "thresholdLabels": false,
-        "thresholdMarkers": true
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "N/A"
+                }
+              },
+              "type": "special"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "dthms"
+        },
+        "overrides": []
       },
       "gridPos": {
         "h": 2,
@@ -111,41 +129,23 @@
       "id": 12,
       "interval": null,
       "links": [],
-      "mappingType": 1,
-      "mappingTypes": [
-        {
-          "name": "value to text",
-          "value": 1
-        },
-        {
-          "name": "range to text",
-          "value": 2
-        }
-      ],
       "maxDataPoints": 100,
-      "nullPointMode": "connected",
-      "nullText": null,
-      "options": {},
-      "postfix": "",
-      "postfixFontSize": "50%",
-      "prefix": "",
-      "prefixFontSize": "50%",
-      "rangeMaps": [
-        {
-          "from": "null",
-          "text": "N/A",
-          "to": "null"
-        }
-      ],
-      "sparkline": {
-        "fillColor": "rgba(31, 118, 189, 0.18)",
-        "full": false,
-        "lineColor": "rgb(31, 120, 193)",
-        "show": false,
-        "ymax": null,
-        "ymin": null
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "auto"
       },
-      "tableColumn": "",
+      "pluginVersion": "8.0.4",
       "targets": [
         {
           "groupBy": [
@@ -190,24 +190,36 @@
           ]
         }
       ],
-      "thresholds": "",
       "timeFrom": null,
       "timeShift": null,
       "title": "Productive Time",
-      "type": "singlestat",
-      "valueFontSize": "80%",
-      "valueMaps": [
-        {
-          "op": "=",
-          "text": "N/A",
-          "value": "null"
-        }
-      ],
-      "valueName": "total"
+      "type": "stat"
     },
     {
       "cacheTimeout": null,
       "datasource": "${DS_RESCUETIME}",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "displayName": "${__cell_2}",
+          "mappings": [],
+          "max": 4000,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
       "gridPos": {
         "h": 6,
         "w": 15,
@@ -218,30 +230,19 @@
       "links": [],
       "options": {
         "displayMode": "gradient",
-        "fieldOptions": {
+        "orientation": "vertical",
+        "reduceOptions": {
           "calcs": [
             "mean"
           ],
-          "defaults": {
-            "mappings": [],
-            "max": 4000,
-            "min": 0,
-            "thresholds": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ],
-            "title": "${__cell_2}",
-            "unit": "s"
-          },
+          "fields": "",
           "limit": 10,
-          "override": {},
           "values": true
         },
-        "orientation": "vertical"
+        "showUnfilled": true,
+        "text": {}
       },
-      "pluginVersion": "6.5.1",
+      "pluginVersion": "8.0.4",
       "targets": [
         {
           "alias": "",
@@ -288,16 +289,26 @@
       "type": "bargauge"
     },
     {
-      "aliasColors": {},
-      "breakPoint": "50%",
       "cacheTimeout": null,
-      "combine": {
-        "label": "Others",
-        "threshold": "0.03"
-      },
       "datasource": "${DS_RESCUETIME}",
-      "fontSize": "80%",
-      "format": "s",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "decimals": 0,
+          "mappings": [],
+          "unit": "s"
+        },
+        "overrides": []
+      },
       "gridPos": {
         "h": 6,
         "w": 7,
@@ -306,19 +317,29 @@
       },
       "id": 2,
       "interval": null,
-      "legend": {
-        "show": true,
-        "sort": "total",
-        "sortDesc": true,
-        "values": true
-      },
-      "legendType": "Right side",
       "links": [],
       "maxDataPoints": 3,
-      "nullPointMode": "connected",
-      "options": {},
-      "pieType": "donut",
-      "strokeWidth": 1,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "table",
+          "placement": "right",
+          "values": [
+            "value"
+          ]
+        },
+        "pieType": "donut",
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
       "targets": [
         {
           "alias": "$tag_category",
@@ -353,26 +374,39 @@
       "timeFrom": null,
       "timeShift": null,
       "title": "Categories",
-      "type": "grafana-piechart-panel",
-      "valueName": "total"
+      "type": "piechart"
     },
     {
       "cacheTimeout": null,
-      "colorBackground": false,
-      "colorValue": true,
-      "colors": [
-        "#C4162A",
-        "#C4162A",
-        "#C4162A"
-      ],
       "datasource": "${DS_RESCUETIME}",
-      "format": "dthms",
-      "gauge": {
-        "maxValue": 100,
-        "minValue": 0,
-        "show": false,
-        "thresholdLabels": false,
-        "thresholdMarkers": true
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "N/A"
+                }
+              },
+              "type": "special"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              }
+            ]
+          },
+          "unit": "dthms"
+        },
+        "overrides": []
       },
       "gridPos": {
         "h": 2,
@@ -383,41 +417,23 @@
       "id": 13,
       "interval": null,
       "links": [],
-      "mappingType": 1,
-      "mappingTypes": [
-        {
-          "name": "value to text",
-          "value": 1
-        },
-        {
-          "name": "range to text",
-          "value": 2
-        }
-      ],
       "maxDataPoints": 100,
-      "nullPointMode": "connected",
-      "nullText": null,
-      "options": {},
-      "postfix": "",
-      "postfixFontSize": "50%",
-      "prefix": "",
-      "prefixFontSize": "50%",
-      "rangeMaps": [
-        {
-          "from": "null",
-          "text": "N/A",
-          "to": "null"
-        }
-      ],
-      "sparkline": {
-        "fillColor": "rgba(31, 118, 189, 0.18)",
-        "full": false,
-        "lineColor": "rgb(31, 120, 193)",
-        "show": false,
-        "ymax": null,
-        "ymin": null
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "auto"
       },
-      "tableColumn": "",
+      "pluginVersion": "8.0.4",
       "targets": [
         {
           "groupBy": [
@@ -462,38 +478,46 @@
           ]
         }
       ],
-      "thresholds": "",
       "timeFrom": null,
       "timeShift": null,
       "title": "Distracting Time",
-      "type": "singlestat",
-      "valueFontSize": "80%",
-      "valueMaps": [
-        {
-          "op": "=",
-          "text": "N/A",
-          "value": "null"
-        }
-      ],
-      "valueName": "total"
+      "type": "stat"
     },
     {
       "cacheTimeout": null,
-      "colorBackground": false,
-      "colorValue": false,
-      "colors": [
-        "#299c46",
-        "#37872D",
-        "#37872D"
-      ],
       "datasource": "${DS_RESCUETIME}",
-      "format": "dthms",
-      "gauge": {
-        "maxValue": 100,
-        "minValue": 0,
-        "show": false,
-        "thresholdLabels": false,
-        "thresholdMarkers": true
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "N/A"
+                }
+              },
+              "type": "special"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "dthms"
+        },
+        "overrides": []
       },
       "gridPos": {
         "h": 2,
@@ -504,41 +528,23 @@
       "id": 14,
       "interval": null,
       "links": [],
-      "mappingType": 1,
-      "mappingTypes": [
-        {
-          "name": "value to text",
-          "value": 1
-        },
-        {
-          "name": "range to text",
-          "value": 2
-        }
-      ],
       "maxDataPoints": 100,
-      "nullPointMode": "connected",
-      "nullText": null,
-      "options": {},
-      "postfix": "",
-      "postfixFontSize": "50%",
-      "prefix": "",
-      "prefixFontSize": "50%",
-      "rangeMaps": [
-        {
-          "from": "null",
-          "text": "N/A",
-          "to": "null"
-        }
-      ],
-      "sparkline": {
-        "fillColor": "rgba(31, 118, 189, 0.18)",
-        "full": false,
-        "lineColor": "rgb(31, 120, 193)",
-        "show": false,
-        "ymax": null,
-        "ymin": null
+      "options": {
+        "colorMode": "none",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "auto"
       },
-      "tableColumn": "",
+      "pluginVersion": "8.0.4",
       "targets": [
         {
           "groupBy": [
@@ -577,20 +583,10 @@
           "tags": []
         }
       ],
-      "thresholds": "",
       "timeFrom": null,
       "timeShift": null,
       "title": "Total Time",
-      "type": "singlestat",
-      "valueFontSize": "80%",
-      "valueMaps": [
-        {
-          "op": "=",
-          "text": "N/A",
-          "value": "null"
-        }
-      ],
-      "valueName": "total"
+      "type": "stat"
     },
     {
       "aliasColors": {},
@@ -598,6 +594,12 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "${DS_RESCUETIME}",
+      "fieldConfig": {
+        "defaults": {
+          "links": []
+        },
+        "overrides": []
+      },
       "fill": 1,
       "fillGradient": 10,
       "gridPos": {
@@ -608,6 +610,7 @@
       },
       "hiddenSeries": false,
       "id": 4,
+      "interval": "1h",
       "legend": {
         "alignAsTable": false,
         "avg": false,
@@ -624,10 +627,10 @@
       "linewidth": 2,
       "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "6.5.1",
+      "pluginVersion": "8.0.4",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -745,6 +748,12 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "${DS_RESCUETIME}",
+      "fieldConfig": {
+        "defaults": {
+          "links": []
+        },
+        "overrides": []
+      },
       "fill": 1,
       "fillGradient": 10,
       "gridPos": {
@@ -755,6 +764,7 @@
       },
       "hiddenSeries": false,
       "id": 10,
+      "interval": "1h",
       "legend": {
         "alignAsTable": false,
         "avg": false,
@@ -767,14 +777,14 @@
         "total": false,
         "values": false
       },
-      "lines": true,
+      "lines": false,
       "linewidth": 2,
       "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "6.5.1",
+      "pluginVersion": "8.0.4",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -952,7 +962,6 @@
         "y": 15
       },
       "id": 16,
-      "options": {},
       "pageSize": null,
       "showHeader": true,
       "sort": {
@@ -962,12 +971,14 @@
       "styles": [
         {
           "alias": "Time",
+          "align": "auto",
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "pattern": "Time",
           "type": "hidden"
         },
         {
           "alias": "",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -984,6 +995,7 @@
         },
         {
           "alias": "Duration",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -998,6 +1010,7 @@
         },
         {
           "alias": "Activity",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -1014,6 +1027,7 @@
         },
         {
           "alias": "Category",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -1072,7 +1086,7 @@
       "timeShift": null,
       "title": "Top Productive Activities",
       "transform": "table",
-      "type": "table"
+      "type": "table-old"
     },
     {
       "columns": [],
@@ -1085,7 +1099,6 @@
         "y": 15
       },
       "id": 17,
-      "options": {},
       "pageSize": null,
       "showHeader": true,
       "sort": {
@@ -1095,12 +1108,14 @@
       "styles": [
         {
           "alias": "Time",
+          "align": "auto",
           "dateFormat": "YYYY-MM-DD HH:mm:ss",
           "pattern": "Time",
           "type": "hidden"
         },
         {
           "alias": "",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -1117,6 +1132,7 @@
         },
         {
           "alias": "Duration",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -1131,6 +1147,7 @@
         },
         {
           "alias": "Activity",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -1147,6 +1164,7 @@
         },
         {
           "alias": "Category",
+          "align": "auto",
           "colorMode": null,
           "colors": [
             "rgba(245, 54, 54, 0.9)",
@@ -1205,18 +1223,18 @@
       "timeShift": null,
       "title": "Top Distracting Activities",
       "transform": "table",
-      "type": "table"
+      "type": "table-old"
     }
   ],
   "refresh": false,
-  "schemaVersion": 21,
+  "schemaVersion": 30,
   "style": "dark",
   "tags": [],
   "templating": {
     "list": []
   },
   "time": {
-    "from": "now-24h",
+    "from": "now-6h",
     "to": "now"
   },
   "timepicker": {
@@ -1236,5 +1254,5 @@
   "timezone": "",
   "title": "RescueTime",
   "uid": "peIaduZgk",
-  "version": 27
+  "version": 30
 }

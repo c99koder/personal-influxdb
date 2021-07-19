@@ -14,18 +14,12 @@
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
-      "version": "6.5.1"
-    },
-    {
-      "type": "panel",
-      "id": "grafana-piechart-panel",
-      "name": "Pie Chart",
-      "version": "1.3.9"
+      "version": "8.0.4"
     },
     {
       "type": "panel",
       "id": "graph",
-      "name": "Graph",
+      "name": "Graph (old)",
       "version": ""
     },
     {
@@ -33,6 +27,12 @@
       "id": "influxdb",
       "name": "InfluxDB",
       "version": "1.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "piechart",
+      "name": "Pie chart",
+      "version": ""
     }
   ],
   "annotations": {
@@ -60,6 +60,12 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "${DS_TODOIST}",
+      "fieldConfig": {
+        "defaults": {
+          "links": []
+        },
+        "overrides": []
+      },
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
@@ -83,9 +89,10 @@
       "linewidth": 1,
       "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "8.0.4",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -199,16 +206,26 @@
       }
     },
     {
-      "aliasColors": {},
-      "breakPoint": "50%",
       "cacheTimeout": null,
-      "combine": {
-        "label": "Others",
-        "threshold": "0.01"
-      },
       "datasource": "${DS_TODOIST}",
-      "fontSize": "80%",
-      "format": "locale",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "decimals": 0,
+          "mappings": [],
+          "unit": "locale"
+        },
+        "overrides": []
+      },
       "gridPos": {
         "h": 8,
         "w": 8,
@@ -217,20 +234,30 @@
       },
       "id": 2,
       "interval": null,
-      "legend": {
-        "percentage": true,
-        "show": true,
-        "sort": "total",
-        "sortDesc": true,
-        "values": true
-      },
-      "legendType": "Right side",
       "links": [],
       "maxDataPoints": 3,
-      "nullPointMode": "connected",
-      "options": {},
-      "pieType": "pie",
-      "strokeWidth": 1,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "table",
+          "placement": "right",
+          "values": [
+            "value",
+            "percent"
+          ]
+        },
+        "pieType": "pie",
+        "reduceOptions": {
+          "calcs": [
+            "sum"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
       "targets": [
         {
           "alias": "$tag_project_name",
@@ -267,8 +294,7 @@
       "timeFrom": null,
       "timeShift": null,
       "title": "Completed Tasks by Project",
-      "type": "grafana-piechart-panel",
-      "valueName": "total"
+      "type": "piechart"
     },
     {
       "aliasColors": {},
@@ -276,6 +302,12 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "${DS_TODOIST}",
+      "fieldConfig": {
+        "defaults": {
+          "links": []
+        },
+        "overrides": []
+      },
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
@@ -300,9 +332,10 @@
       "linewidth": 1,
       "nullPointMode": "null",
       "options": {
-        "dataLinks": []
+        "alertThreshold": true
       },
       "percentage": false,
+      "pluginVersion": "8.0.4",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -391,14 +424,14 @@
       }
     }
   ],
-  "schemaVersion": 21,
+  "schemaVersion": 30,
   "style": "dark",
   "tags": [],
   "templating": {
     "list": []
   },
   "time": {
-    "from": "now-90d",
+    "from": "now-1y",
     "to": "now"
   },
   "timepicker": {
@@ -418,5 +451,5 @@
   "timezone": "",
   "title": "Todoist",
   "uid": "avH3T9ggk",
-  "version": 2
+  "version": 3
 }
