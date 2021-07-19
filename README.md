@@ -44,7 +44,8 @@ Run each Python script from the terminal and it will insert the most recent data
 The [grafana](grafana/) folder contains json files for various example dashboards.
 Most dashboards require the `grafana-piechart-panel` plugin, and the Foursquaure panel also requires the panodata `grafana-map-panel` plugin:
 ```
-$ grafana-cli --pluginUrl https://packages.hiveeyes.org/grafana/grafana-map-panel/grafana-map-panel-0.8.0.zip plugins install grafana-map-panel
+$ grafana-cli plugins install grafana-piechart-panel
+$ grafana-cli --pluginUrl grafana-cli --pluginUrl https://github.com/panodata/grafana-map-panel/releases/download/0.15.0/grafana-map-panel-0.15.0.zip plugins install grafana-map-panel plugins install grafana-map-panel
 ```
 
 ### RescueTime dashboard
