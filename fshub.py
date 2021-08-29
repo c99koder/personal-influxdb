@@ -41,7 +41,7 @@ def fetch(limit, cursor):
     print("Got flights %s from FsHub" % (len(data['data'])))
 
     for flight in data['data']:
-        if flight['departure']['icao'] != None and flight['arrival']['icao'] != None:
+        if flight['departure'] != None and flight['departure']['icao'] != None and flight['arrival'] != None and flight['arrival']['icao'] != None:
             points.append({
                 "measurement": "flight",
                 "time": flight['departure']['time'],
