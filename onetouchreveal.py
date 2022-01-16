@@ -75,7 +75,7 @@ if len(data['result']['bgReadings']) > 0:
                 "deviceSerialNumber": reading['deviceSerialNumber'],
             },
             "fields": {
-                "value": reading['bgValue']['value'],
+                "value": int(reading['bgValue']['value']),
                 "units": reading['bgValue']['units'],
             }
         })
