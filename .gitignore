@@ -132,3 +132,4 @@ dmypy.json
 .trakt.json
 .fitbit-refreshtoken
 *.sqlite
+*.code-workspace
