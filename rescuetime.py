@@ -51,6 +51,7 @@ for activity in activities['rows']:
             "fields": {
                 "duration": activity[1],
                 "productivity": activity[5],
+                "score": activity[1] * activity[5]
             }
         })
 
