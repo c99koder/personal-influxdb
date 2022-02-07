@@ -1,42 +1,29 @@
 #!/usr/bin/python3
-
-#  Copyright (C) 2021 Sam Steele
-#  Licensed under the Apache License, Version 2.0 (the "License");
-#  you may not use this file except in compliance with the License.
-#  You may obtain a copy of the License at
-#
-#  http://www.apache.org/licenses/LICENSE-2.0
-#
-#  Unless required by applicable law or agreed to in writing, software
-#  distributed under the License is distributed on an "AS IS" BASIS,
-#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#  See the License for the specific language governing permissions and
-#  limitations under the License.
+# Copyright 2022 Sam Steele
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import os, ntpath, json, pytz, urllib
 import xml.etree.ElementTree as ET
 from datetime import datetime
-from influxdb import InfluxDBClient
-from influxdb.exceptions import InfluxDBClientError
+from config import *
 
-LOCAL_TIMEZONE = pytz.timezone('America/New_York')
-RETROARCH_LOGS = '/home/ark/.config/retroarch/playlists/logs/'
-EMULATIONSTATION_ROMS = '/roms'
-IMAGE_WEB_PREFIX = 'https://example.net/retroarch_images/'
-INFLUXDB_HOST = 'localhost'
-INFLUXDB_PORT = 8086
-INFLUXDB_USERNAME = 'root'
-INFLUXDB_PASSWORD = 'root'
-INFLUXDB_DATABASE = 'gaming'
+if not os.path.isdir(EMULATIONSTATION_ROMS):
+	logging.error("Unable to find path: %s", EMULATIONSTATION_ROMS)
+	sys.exit(1)
+
 points = []
-
-try:
-    client = InfluxDBClient(host=INFLUXDB_HOST, port=INFLUXDB_PORT, username=INFLUXDB_USERNAME, password=INFLUXDB_PASSWORD)
-    client.create_database(INFLUXDB_DATABASE)
-    client.switch_database(INFLUXDB_DATABASE)
-except InfluxDBClientError as err:
-    print("InfluxDB connection failed: %s" % (err))
-    sys.exit()
+client = connect(GAMING_DATABASE)
 
 roms = {}
 for platform in os.listdir(EMULATIONSTATION_ROMS):
@@ -56,7 +43,7 @@ for platform in os.listdir(EMULATIONSTATION_ROMS):
 				roms[rom['key']] = rom
 
 for core in os.listdir(RETROARCH_LOGS):
-	totals = client.query('SELECT last("total") AS "total" FROM "time" WHERE "total" > 0 AND "player_id" = \'' + core + '\' GROUP BY "application_id" ORDER BY "time" DESC')
+	totals = client.query(f'SELECT last("total") AS "total" FROM "time" WHERE "total" > 0 AND "player_id" = \'{core}\' GROUP BY "application_id" ORDER BY "time" DESC')
 
 	for log in os.listdir(RETROARCH_LOGS + '/' + core):
 		key = os.path.splitext(log)[0]
@@ -86,15 +73,9 @@ for core in os.listdir(RETROARCH_LOGS):
 					"fields": {
 						"value": int(value),
 						"total": runtime,
-						"image": IMAGE_WEB_PREFIX + urllib.parse.quote(rom['path']) + '/' + urllib.parse.quote(rom['key']) + '.png',
-						"url": 'https://thegamesdb.net/search.php?name=' + urllib.parse.quote_plus(rom['name'])
+						"image": f"{RETROARCH_IMAGE_WEB_PREFIX}{urllib.parse.quote(rom['path'])}/{urllib.parse.quote(rom['key'])}.png",
+						"url": f"https://thegamesdb.net/search.php?name={urllib.parse.quote_plus(rom['name'])}"
 					}
 			    })
 
-try:
-    client.write_points(points)
-except InfluxDBClientError as err:
-    print("Unable to write points to InfluxDB: %s" % (err))
-    sys.exit()
-
-print("Successfully wrote %s data points to InfluxDB" % (len(points)))
+write_points(points)

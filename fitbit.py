@@ -1,48 +1,38 @@
 #!/usr/bin/python3
-
-#  Copyright (C) 2019 Sam Steele
-#  Licensed under the Apache License, Version 2.0 (the "License");
-#  you may not use this file except in compliance with the License.
-#  You may obtain a copy of the License at
-#
-#  http://www.apache.org/licenses/LICENSE-2.0
-#
-#  Unless required by applicable law or agreed to in writing, software
-#  distributed under the License is distributed on an "AS IS" BASIS,
-#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#  See the License for the specific language governing permissions and
-#  limitations under the License.
+# Copyright 2022 Sam Steele
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import requests, sys, os, pytz
 from datetime import datetime, date, timedelta
-from influxdb import InfluxDBClient
-from influxdb.exceptions import InfluxDBClientError
+from config import *
 
-LOCAL_TIMEZONE = pytz.timezone('America/New_York')
-FITBIT_LANGUAGE = 'en_US'
-FITBIT_CLIENT_ID = ''
-FITBIT_CLIENT_SECRET = ''
-FITBIT_ACCESS_TOKEN = ''
-FITBIT_INITIAL_CODE = ''
-REDIRECT_URI = 'https://localhost'
-INFLUXDB_HOST = 'localhost'
-INFLUXDB_PORT = 8086
-INFLUXDB_USERNAME = 'root'
-INFLUXDB_PASSWORD = 'root'
-INFLUXDB_DATABASE = 'fitbit'
+if not FITBIT_CLIENT_ID or not FITBIT_CLIENT_SECRET:
+    logging.error("FITBIT_CLIENT_ID or FITBIT_CLIENT_SECRET not set in config.py")
+    sys.exit(1)
 points = []
 
 def fetch_data(category, type):
     try:
-        response = requests.get('https://api.fitbit.com/1/user/-/' + category + '/' + type + '/date/today/1d.json', 
-            headers={'Authorization': 'Bearer ' + FITBIT_ACCESS_TOKEN, 'Accept-Language': FITBIT_LANGUAGE})
+        response = requests.get(f'https://api.fitbit.com/1/user/-/{category}/{type}/date/today/1d.json', 
+            headers={'Authorization': f'Bearer {FITBIT_ACCESS_TOKEN}', 'Accept-Language': FITBIT_LANGUAGE})
         response.raise_for_status()
     except requests.exceptions.HTTPError as err:
-        print("HTTP request failed: %s" % (err))
-        sys.exit()
+        logging.error("HTTP request failed: %s", err)
+        sys.exit(1)
 
     data = response.json()
-    print("Got " + type + " from Fitbit")
+    logging.info(f"Got {type} from Fitbit")
 
     for day in data[category.replace('/', '-') + '-' + type]:
         points.append({
@@ -55,15 +45,15 @@ def fetch_data(category, type):
 
 def fetch_heartrate(date):
     try:
-        response = requests.get('https://api.fitbit.com/1/user/-/activities/heart/date/' + date + '/1d/1min.json', 
-            headers={'Authorization': 'Bearer ' + FITBIT_ACCESS_TOKEN, 'Accept-Language': FITBIT_LANGUAGE})
+        response = requests.get(f'https://api.fitbit.com/1/user/-/activities/heart/date/{date}/1d/1min.json', 
+            headers={'Authorization': f'Bearer {FITBIT_ACCESS_TOKEN}', 'Accept-Language': FITBIT_LANGUAGE})
         response.raise_for_status()
     except requests.exceptions.HTTPError as err:
-        print("HTTP request failed: %s" % (err))
-        sys.exit()
+        logging.error("HTTP request failed: %s", err)
+        sys.exit(1)
 
     data = response.json()
-    print("Got heartrates from Fitbit")
+    logging.info("Got heartrates from Fitbit")
 
     for day in data['activities-heart']:
         if 'restingHeartRate' in day['value']:
@@ -140,15 +130,15 @@ def process_levels(levels):
 def fetch_activities(date):
     try:
         response = requests.get('https://api.fitbit.com/1/user/-/activities/list.json',
-            headers={'Authorization': 'Bearer ' + FITBIT_ACCESS_TOKEN, 'Accept-Language': FITBIT_LANGUAGE},
+            headers={'Authorization': f'Bearer {FITBIT_ACCESS_TOKEN}', 'Accept-Language': FITBIT_LANGUAGE},
             params={'beforeDate': date, 'sort':'desc', 'limit':10, 'offset':0})
         response.raise_for_status()
     except requests.exceptions.HTTPError as err:
-        print("HTTP request failed: %s" % (err))
-        sys.exit()
+        logging.error("HTTP request failed: %s", err)
+        sys.exit(1)
 
     data = response.json()
-    print("Got activities from Fitbit")
+    logging.info("Got activities from Fitbit")
 
     for activity in data['activities']:
         fields = {}
@@ -191,24 +181,18 @@ def fetch_activities(date):
             "fields": fields
         })
 
-try:
-    client = InfluxDBClient(host=INFLUXDB_HOST, port=INFLUXDB_PORT, username=INFLUXDB_USERNAME, password=INFLUXDB_PASSWORD)
-    client.create_database(INFLUXDB_DATABASE)
-    client.switch_database(INFLUXDB_DATABASE)
-except InfluxDBClientError as err:
-    print("InfluxDB connection failed: %s" % (err))
-    sys.exit()
+connect(FITBIT_DATABASE)
 
 if not FITBIT_ACCESS_TOKEN:
     if os.path.isfile('.fitbit-refreshtoken'):
         f = open(".fitbit-refreshtoken", "r")
-        token = f.read();
-        f.close();
+        token = f.read()
+        f.close()
         response = requests.post('https://api.fitbit.com/oauth2/token',
             data={
                 "client_id": FITBIT_CLIENT_ID,
                 "grant_type": "refresh_token",
-                "redirect_uri": REDIRECT_URI,
+                "redirect_uri": FITBIT_REDIRECT_URI,
                 "refresh_token": token
             }, auth=(FITBIT_CLIENT_ID, FITBIT_CLIENT_SECRET))
     else:
@@ -216,11 +200,11 @@ if not FITBIT_ACCESS_TOKEN:
             data={
                 "client_id": FITBIT_CLIENT_ID,
                 "grant_type": "authorization_code",
-                "redirect_uri": REDIRECT_URI,
+                "redirect_uri": FITBIT_REDIRECT_URI,
                 "code": FITBIT_INITIAL_CODE
             }, auth=(FITBIT_CLIENT_ID, FITBIT_CLIENT_SECRET))
 
-    response.raise_for_status();
+    response.raise_for_status()
 
     json = response.json()
     FITBIT_ACCESS_TOKEN = json['access_token']
@@ -231,14 +215,14 @@ if not FITBIT_ACCESS_TOKEN:
 
 try:
     response = requests.get('https://api.fitbit.com/1/user/-/devices.json', 
-        headers={'Authorization': 'Bearer ' + FITBIT_ACCESS_TOKEN, 'Accept-Language': FITBIT_LANGUAGE})
+        headers={'Authorization': f'Bearer {FITBIT_ACCESS_TOKEN}', 'Accept-Language': FITBIT_LANGUAGE})
     response.raise_for_status()
 except requests.exceptions.HTTPError as err:
-    print("HTTP request failed: %s" % (err))
-    sys.exit()
+    logging.error("HTTP request failed: %s", err)
+    sys.exit(1)
 
 data = response.json()
-print("Got devices from Fitbit")
+logging.info("Got devices from Fitbit")
 
 for device in data:
     points.append({
@@ -259,15 +243,15 @@ end = date.today()
 start = end - timedelta(days=1)
 
 try:
-    response = requests.get('https://api.fitbit.com/1.2/user/-/sleep/date/' + start.isoformat() + '/' + end.isoformat() + '.json',
-        headers={'Authorization': 'Bearer ' + FITBIT_ACCESS_TOKEN, 'Accept-Language': FITBIT_LANGUAGE})
+    response = requests.get(f'https://api.fitbit.com/1.2/user/-/sleep/date/{start.isoformat()}/{end.isoformat()}.json',
+        headers={'Authorization': f'Bearer {FITBIT_ACCESS_TOKEN}', 'Accept-Language': FITBIT_LANGUAGE})
     response.raise_for_status()
 except requests.exceptions.HTTPError as err:
-    print("HTTP request failed: %s" % (err))
-    sys.exit()
+    logging.error("HTTP request failed: %s", err)
+    sys.exit(1)
 
 data = response.json()
-print("Got sleep sessions from Fitbit")
+logging.info("Got sleep sessions from Fitbit")
 
 for day in data['sleep']:
     time = datetime.fromisoformat(day['startTime'])
@@ -332,10 +316,4 @@ fetch_data('foods/log', 'caloriesIn')
 fetch_heartrate(date.today().isoformat())
 fetch_activities((date.today() + timedelta(days=1)).isoformat())
 
-try:
-    client.write_points(points)
-except InfluxDBClientError as err:
-    print("Unable to write points to InfluxDB: %s" % (err))
-    sys.exit()
-
-print("Successfully wrote %s data points to InfluxDB" % (len(points)))
+write_points(points)

@@ -1,44 +1,39 @@
 #!/usr/bin/python3
+# Copyright 2022 Sam Steele
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-#  Copyright (C) 2020 Sam Steele
-#  Licensed under the Apache License, Version 2.0 (the "License");
-#  you may not use this file except in compliance with the License.
-#  You may obtain a copy of the License at
-#
-#  http://www.apache.org/licenses/LICENSE-2.0
-#
-#  Unless required by applicable law or agreed to in writing, software
-#  distributed under the License is distributed on an "AS IS" BASIS,
-#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#  See the License for the specific language governing permissions and
-#  limitations under the License.
+import requests, sys
+from config import *
 
-import requests, requests_cache, sys, math
-from datetime import datetime, date, timedelta
-from influxdb import InfluxDBClient
-from influxdb.exceptions import InfluxDBClientError
+if not FSHUB_API_KEY:
+    logging.error("FSHUB_API_KEY not set in config.py")
+    sys.exit(1)
 
-FSHUB_API_KEY = ''
-FSHUB_PILOT_ID = ''
-INFLUXDB_HOST = 'localhost'
-INFLUXDB_PORT = 8086
-INFLUXDB_USERNAME = 'root'
-INFLUXDB_PASSWORD = 'root'
-INFLUXDB_DATABASE = 'fshub'
 points = []
 
 def fetch(limit, cursor):
     try:
-        response = requests.get('https://fshub.io/api/v3/pilot/' + FSHUB_PILOT_ID + '/flight',
+        response = requests.get(f'https://fshub.io/api/v3/pilot/{FSHUB_PILOT_ID}/flight',
             params={'limit': limit, 'cursor': cursor},
             headers={'X-Pilot-Token': FSHUB_API_KEY, 'Content-Type': 'application/json'})
         response.raise_for_status()
     except requests.exceptions.HTTPError as err:
-        print("HTTP request failed: %s" % (err))
-        sys.exit()
+        logging.error("HTTP request failed: %s", err)
+        sys.exit(1)
 
     data = response.json()
-    print("Got flights %s from FsHub" % (len(data['data'])))
+    logging.info("Got flights %s from FsHub", len(data['data']))
 
     for flight in data['data']:
         if flight['departure'] != None and flight['departure']['icao'] != None and flight['arrival'] != None and flight['arrival']['icao'] != None:
@@ -72,7 +67,7 @@ def fetch(limit, cursor):
                     "depature_bank": flight['departure']['bank'],
                     "depature_wind_spd": flight['departure']['wind']['spd'],
                     "depature_wind_dir": flight['departure']['wind']['dir'],
-                    "departure_url": "https://fshub.io/airport/" + flight['departure']['icao'].upper(),
+                    "departure_url": f"https://fshub.io/airport/{flight['departure']['icao'].upper()}",
                     "arrival_icao": flight['arrival']['icao'],
                     "arrival_iata": flight['arrival']['iata'],
                     "arrival_name": flight['arrival']['name'],
@@ -87,9 +82,9 @@ def fetch(limit, cursor):
                     "arrival_bank": flight['arrival']['bank'],
                     "arrival_wind_spd": flight['arrival']['wind']['spd'],
                     "arrival_wind_dir": flight['arrival']['wind']['dir'],
-                    "arrival_url": "https://fshub.io/airport/" + flight['arrival']['icao'].upper(),
-                    "flight_url": "https://fshub.io/flight/" + str(flight['id']),
-                    "pilot_url": "https://fshub.io/pilot/" + str(flight['user']['id'])
+                    "arrival_url": f"https://fshub.io/airport/{flight['arrival']['icao'].upper()}",
+                    "flight_url": f"https://fshub.io/flight/{str(flight['id'])}",
+                    "pilot_url": f"https://fshub.io/pilot/{str(flight['user']['id'])}"
                 }
             })
             points.append({
@@ -105,7 +100,7 @@ def fetch(limit, cursor):
                     "name": flight['departure']['name'],
                     "lat": flight['departure']['geo']['lat'],
                     "long": flight['departure']['geo']['lng'],
-                    "url": "https://fshub.io/airport/" + flight['departure']['icao'].upper()
+                    "url": f"https://fshub.io/airport/{flight['departure']['icao'].upper()}"
                 }
             })
             points.append({
@@ -121,7 +116,7 @@ def fetch(limit, cursor):
                     "name": flight['arrival']['name'],
                     "lat": flight['arrival']['geo']['lat'],
                     "long": flight['arrival']['geo']['lng'],
-                    "url": "https://fshub.io/airport/" + flight['arrival']['icao'].upper()
+                    "url": f"https://fshub.io/airport/{flight['arrival']['icao'].upper()}"
                 }
             })
     if data['meta']['cursor']['count'] == limit:
@@ -129,24 +124,11 @@ def fetch(limit, cursor):
     else:
         return -1
 
-try:
-    client = InfluxDBClient(host=INFLUXDB_HOST, port=INFLUXDB_PORT, username=INFLUXDB_USERNAME, password=INFLUXDB_PASSWORD)
-    client.create_database(INFLUXDB_DATABASE)
-    client.switch_database(INFLUXDB_DATABASE)
-except InfluxDBClientError as err:
-    print("InfluxDB connection failed: %s" % (err))
-    sys.exit()
+connect(FSHUB_DATABASE)
 
 cursor = 0
 
 while cursor != -1:
     cursor = fetch(100,cursor)
-
-    try:
-        client.write_points(points)
-    except InfluxDBClientError as err:
-        print("Unable to write points to InfluxDB: %s" % (err))
-        sys.exit()
-
-    print("Successfully wrote %s data points to InfluxDB" % (len(points)))
+    write_points(points)
     points = []

@@ -1,30 +1,26 @@
 #!/usr/bin/python3
+# Copyright 2022 Sam Steele
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-#  Copyright (C) 2020 Sam Steele
-#  Licensed under the Apache License, Version 2.0 (the "License");
-#  you may not use this file except in compliance with the License.
-#  You may obtain a copy of the License at
-#
-#  http://www.apache.org/licenses/LICENSE-2.0
-#
-#  Unless required by applicable law or agreed to in writing, software
-#  distributed under the License is distributed on an "AS IS" BASIS,
-#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#  See the License for the specific language governing permissions and
-#  limitations under the License.
+import requests, requests_cache, sys, math, logging
+from datetime import datetime, date
+from config import *
 
-import requests, requests_cache, sys, math
-from datetime import datetime, date, timedelta
-from influxdb import InfluxDBClient
-from influxdb.exceptions import InfluxDBClientError
+if not EDSM_API_KEY:
+    logging.error("EDSM_API_KEY not set in config.py")
+    sys.exit(1)
 
-EDSM_API_KEY = ''
-EDSM_COMMANDER_NAME = ''
-INFLUXDB_HOST = 'localhost'
-INFLUXDB_PORT = 8086
-INFLUXDB_USERNAME = 'root'
-INFLUXDB_PASSWORD = 'root'
-INFLUXDB_DATABASE = 'edsm'
 points = []
 last = None
 
@@ -50,8 +46,8 @@ def fetch_system(name):
             params={'systemName':name, 'showCoordinates':1, 'showPrimaryStar':1, 'apiKey':EDSM_API_KEY})
         response.raise_for_status()
     except requests.exceptions.HTTPError as err:
-        print("HTTP request failed: %s" % (err))
-        sys.exit()
+        logging.error("HTTP request failed: %s", err)
+        sys.exit(1)
 
     return response.json()
 
@@ -109,11 +105,11 @@ def fetch_jumps(time):
             params={'commanderName':EDSM_COMMANDER_NAME, 'apiKey':EDSM_API_KEY, 'endDateTime':time})
         response.raise_for_status()
     except requests.exceptions.HTTPError as err:
-        print("HTTP request failed: %s" % (err))
-        sys.exit()
+        print("HTTP request failed: %s", err)
+        sys.exit(1)
 
     data = response.json()
-    print("Got %s jumps from EDSM" % (len(data['logs'])))
+    logging.info("Got %s jumps from EDSM", len(data['logs']))
 
     for jump in data['logs']:
         if last != None:
@@ -122,24 +118,22 @@ def fetch_jumps(time):
 
     return data
 
-try:
-    client = InfluxDBClient(host=INFLUXDB_HOST, port=INFLUXDB_PORT, username=INFLUXDB_USERNAME, password=INFLUXDB_PASSWORD)
-    client.create_database(INFLUXDB_DATABASE)
-    client.switch_database(INFLUXDB_DATABASE)
-except InfluxDBClientError as err:
-    print("InfluxDB connection failed: %s" % (err))
-    sys.exit()
+connect(EDSM_DATABASE)
 
 try:
     response = requests.get('https://www.edsm.net/api-commander-v1/get-credits',
         params={'commanderName':EDSM_COMMANDER_NAME, 'apiKey':EDSM_API_KEY})
     response.raise_for_status()
 except requests.exceptions.HTTPError as err:
-    print("HTTP request failed: %s" % (err))
-    sys.exit()
+    logging.error("HTTP request failed: %s", err)
+    sys.exit(1)
 
 data = response.json()
-print("Got credits from EDSM")
+if 'credits' not in data:
+    logging.error("Unable to fetch data from EDSM: %s", data['msg'])
+    sys.exit(1)
+
+logging.info("Got credits from EDSM")
 
 for credits in data['credits']:
     points.append({
@@ -158,11 +152,11 @@ try:
         params={'commanderName':EDSM_COMMANDER_NAME, 'apiKey':EDSM_API_KEY})
     response.raise_for_status()
 except requests.exceptions.HTTPError as err:
-    print("HTTP request failed: %s" % (err))
+    logging.error("HTTP request failed: %s" % (err))
     sys.exit()
 
 data = response.json()
-print("Got ranks from EDSM")
+logging.info("Got ranks from EDSM")
 add_rank(data, "Combat")
 add_rank(data, "Trade")
 add_rank(data, "Explore")
@@ -179,10 +173,4 @@ if len(data['logs']) > 0:
     while len(data['logs']) == 0:
         data = fetch_jumps(data['startDateTime'])
 
-try:
-    client.write_points(points)
-except InfluxDBClientError as err:
-    print("Unable to write points to InfluxDB: %s" % (err))
-    sys.exit()
-
-print("Successfully wrote %s data points to InfluxDB" % (len(points)))
+write_points(points)

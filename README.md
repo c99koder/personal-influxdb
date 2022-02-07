@@ -4,7 +4,7 @@ Import personal data from various APIs into InfluxDB
 
 ## Configuration
 
-Open each Python script and set your API credentials and InfluxDB server configuration at the top of the file
+Open `config.py` and set your API credentials and InfluxDB server configuration at the top of the file
 
 * __RescueTime__: Register for an API key at https://www.rescuetime.com/anapi/manage
 * __Foursquare__: Register an app at https://foursquare.com/developers/ and generate an OAuth2 access token
@@ -33,7 +33,7 @@ $ python3 --version
 Install required python3 modules:
 
 ```shell
-$ pip3 install pytz influxdb requests requests-cache instaloader todoist-python trakt.py publicsuffix2
+$ pip3 install pytz influxdb requests requests-cache instaloader todoist-python trakt.py publicsuffix2 logging colorlog
 ```
 
 Run each Python script from the terminal and it will insert the most recent data into InfluxDB.

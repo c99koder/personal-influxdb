@@ -1,42 +1,48 @@
 #!/usr/bin/python3
+# Copyright 2022 Sam Steele
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-#  Copyright (C) 2022 Sam Steele
-#  Licensed under the Apache License, Version 2.0 (the "License");
-#  you may not use this file except in compliance with the License.
-#  You may obtain a copy of the License at
-#
-#  http://www.apache.org/licenses/LICENSE-2.0
-#
-#  Unless required by applicable law or agreed to in writing, software
-#  distributed under the License is distributed on an "AS IS" BASIS,
-#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#  See the License for the specific language governing permissions and
-#  limitations under the License.
-
-import requests, sys, re, json
-from datetime import datetime, date, timedelta
-from influxdb import InfluxDBClient
-from influxdb.exceptions import InfluxDBClientError
+import requests, sys
+from datetime import datetime
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlparse
+from config import *
 
-EXOPHASE_NAME = ''
-STADIA_NAME = ''
-INFLUXDB_HOST = 'localhost'
-INFLUXDB_PORT = 8086
-INFLUXDB_USERNAME = 'root'
-INFLUXDB_PASSWORD = 'root'
-INFLUXDB_DATABASE = 'gaming'
+if not EXOPHASE_NAME:
+    logging.error("EXOPHASE_NAME not set in config.py")
+    sys.exit(1)
+
 points = []
 
 def scrape_exophase_id():
-    response = requests.get(f"https://www.exophase.com/user/{EXOPHASE_NAME}")
+    try:
+        response = requests.get(f"https://www.exophase.com/user/{EXOPHASE_NAME}")
+        response.raise_for_status()
+    except requests.exceptions.HTTPError as err:
+        logging.error("HTTP request failed: %s", err)
+        sys.exit(1)
     soup = BeautifulSoup(response.text, 'html.parser')
     return [soup.find("a", attrs={'data-playerid': True})['data-playerid'], soup.find("div", attrs={'data-userid': True})['data-userid']]
 
 def scrape_latest_games(platform):
     games = []
-    response = requests.get(f"https://www.exophase.com/{platform}/user/{EXOPHASE_NAME}")
+    try:
+        response = requests.get(f"https://www.exophase.com/{platform}/user/{EXOPHASE_NAME}")
+        response.raise_for_status()
+    except requests.exceptions.HTTPError as err:
+        logging.error("HTTP request failed: %s", err)
+        sys.exit(1)
     soup = BeautifulSoup(response.text, 'html.parser')
     for game in soup.find_all("li", attrs={'data-gameid': True}):
         playtime = int(float(game.select_one("span.hours").get_text()[:-1]) * 60)
@@ -54,7 +60,12 @@ def scrape_latest_games(platform):
 
 def scrape_achievements(url, gameid):
     achievements = []
-    response = requests.get(f"https://api.exophase.com/public/player/{urlparse(url).fragment}/game/{gameid}/earned")
+    try:
+        response = requests.get(f"https://api.exophase.com/public/player/{urlparse(url).fragment}/game/{gameid}/earned")
+        response.raise_for_status()
+    except requests.exceptions.HTTPError as err:
+        logging.error("HTTP request failed: %s", err)
+        sys.exit(1)
     json = response.json()
     if json['success'] == True:
         achievement_data = {}
@@ -76,20 +87,14 @@ def scrape_achievements(url, gameid):
 
     return achievements
 
-try:
-    client = InfluxDBClient(host=INFLUXDB_HOST, port=INFLUXDB_PORT, username=INFLUXDB_USERNAME, password=INFLUXDB_PASSWORD)
-    client.create_database(INFLUXDB_DATABASE)
-    client.switch_database(INFLUXDB_DATABASE)
-except InfluxDBClientError as err:
-    print("InfluxDB connection failed: %s" % (err))
-    sys.exit()
+client = connect(STADIA_DATABASE)
 
 PLAYERID, USERID = scrape_exophase_id()
-totals = client.query('SELECT last("total") AS "total" FROM "time" WHERE "platform" = \'Stadia\' AND "total" > 0 AND "player_id" = \'' + PLAYERID + '\' GROUP BY "application_id" ORDER BY "time" DESC')
+totals = client.query(f'SELECT last("total") AS "total" FROM "time" WHERE "platform" = \'Stadia\' AND "total" > 0 AND "player_id" = \'{PLAYERID}\' GROUP BY "application_id" ORDER BY "time" DESC')
 
 for game in scrape_latest_games('stadia'):
-    value = game['playtime'];
-    total = list(totals.get_points(tags={'application_id': str(game['gameid'])}));
+    value = game['playtime']
+    total = list(totals.get_points(tags={'application_id': str(game['gameid'])}))
     if len(total) == 1 and total[0]['total'] > 0:
         value = game['playtime'] - total[0]['total']
     if value > 1:
@@ -131,10 +136,4 @@ for game in scrape_latest_games('stadia'):
                 }
             })
 
-try:
-    client.write_points(points)
-except InfluxDBClientError as err:
-    print("Unable to write points to InfluxDB: %s" % (err))
-    sys.exit()
-
-print("Successfully wrote %s data points to InfluxDB" % (len(points)))
+write_points(points)

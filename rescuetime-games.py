@@ -1,30 +1,21 @@
 #!/usr/bin/python3
+# Copyright 2022 Sam Steele
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-#  Copyright (C) 2020 Sam Steele
-#  Licensed under the Apache License, Version 2.0 (the "License");
-#  you may not use this file except in compliance with the License.
-#  You may obtain a copy of the License at
-#
-#  http://www.apache.org/licenses/LICENSE-2.0
-#
-#  Unless required by applicable law or agreed to in writing, software
-#  distributed under the License is distributed on an "AS IS" BASIS,
-#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#  See the License for the specific language governing permissions and
-#  limitations under the License.
-
-import requests, pytz, sys
+import pytz
 from datetime import datetime, date, timedelta, time
-from influxdb import InfluxDBClient
-from influxdb.exceptions import InfluxDBClientError
-
-LOCAL_TIMEZONE = pytz.timezone('America/New_York')
-INFLUXDB_HOST = 'localhost'
-INFLUXDB_PORT = 8086
-INFLUXDB_USERNAME = 'root'
-INFLUXDB_PASSWORD = 'root'
-GAMING_DATABASE = 'gaming'
-RESCUETIME_DATABASE = 'rescuetime'
+from config import *
 
 games = {
   "angry-birds-vr-isle-of-pigs": {
@@ -139,13 +130,7 @@ games = {
 points = []
 start_time = str(int(LOCAL_TIMEZONE.localize(datetime.combine(date.today(), time(0,0)) - timedelta(days=7)).astimezone(pytz.utc).timestamp()) * 1000) + 'ms'
 
-try:
-    client = InfluxDBClient(host=INFLUXDB_HOST, port=INFLUXDB_PORT, username=INFLUXDB_USERNAME, password=INFLUXDB_PASSWORD)
-    client.create_database(GAMING_DATABASE)
-except InfluxDBClientError as err:
-    print("InfluxDB connection failed: %s" % (err))
-    sys.exit()
-
+client = connect(GAMING_DATABASE)
 client.switch_database(RESCUETIME_DATABASE)
 durations = client.query('SELECT "duration","activity" FROM "activity" WHERE time >= ' + start_time)
 for duration in list(durations.get_points()):
@@ -165,11 +150,5 @@ for duration in list(durations.get_points()):
             }
         })
 
-try:
-    client.switch_database(GAMING_DATABASE)
-    client.write_points(points)
-except InfluxDBClientError as err:
-    print("Unable to write points to InfluxDB: %s" % (err))
-    sys.exit()
-
-print("Successfully wrote %s data points to InfluxDB" % (len(points)))
+client.switch_database(GAMING_DATABASE)
+write_points(points)

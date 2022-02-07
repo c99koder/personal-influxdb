@@ -1,29 +1,26 @@
 #!/usr/bin/python3
-
-#  Copyright (C) 2019 Sam Steele
-#  Licensed under the Apache License, Version 2.0 (the "License");
-#  you may not use this file except in compliance with the License.
-#  You may obtain a copy of the License at
-#
-#  http://www.apache.org/licenses/LICENSE-2.0
-#
-#  Unless required by applicable law or agreed to in writing, software
-#  distributed under the License is distributed on an "AS IS" BASIS,
-#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#  See the License for the specific language governing permissions and
-#  limitations under the License.
+# Copyright 2022 Sam Steele
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import requests, sys
 from datetime import datetime, date, timedelta
-from influxdb import InfluxDBClient
-from influxdb.exceptions import InfluxDBClientError
+from config import *
 
-FOURSQUARE_ACCESS_TOKEN = ''
-INFLUXDB_HOST = 'localhost'
-INFLUXDB_PORT = 8086
-INFLUXDB_USERNAME = 'root'
-INFLUXDB_PASSWORD = 'root'
-INFLUXDB_DATABASE = 'foursquare'
+if not FOURSQUARE_ACCESS_TOKEN:
+    logging.error("FOURSQUARE_ACCESS_TOKEN not set in config.py")
+    sys.exit(1)
+
 points = []
 
 us_states = {
@@ -90,11 +87,11 @@ def fetch_checkins(offset):
             params={'sort': 'newestfirst', 'offset': offset, 'oauth_token':FOURSQUARE_ACCESS_TOKEN, 'v':'20191201', 'limit':250})
         response.raise_for_status()
     except requests.exceptions.HTTPError as err:
-        print("HTTP request failed: %s" % (err))
-        sys.exit()
+        logging.error("HTTP request failed: %s", err)
+        sys.exit(1)
 
     data = response.json()
-    print("Got %s checkins from Foursquare" % (len(data['response']['checkins']['items'])))
+    logging.info("Got %s checkins from Foursquare", len(data['response']['checkins']['items']))
 
     for item in data['response']['checkins']['items']:
         cat = ''
@@ -129,20 +126,6 @@ def fetch_checkins(offset):
 
     return len(data['response']['checkins']['items'])
 
-try:
-    client = InfluxDBClient(host=INFLUXDB_HOST, port=INFLUXDB_PORT, username=INFLUXDB_USERNAME, password=INFLUXDB_PASSWORD)
-    client.create_database(INFLUXDB_DATABASE)
-    client.switch_database(INFLUXDB_DATABASE)
-except InfluxDBClientError as err:
-    print("InfluxDB connection failed: %s" % (err))
-    sys.exit()
-
-count = fetch_checkins(0)
-
-try:
-    client.write_points(points)
-except InfluxDBClientError as err:
-    print("Unable to write points to InfluxDB: %s" % (err))
-    sys.exit()
-
-print("Successfully wrote %s data points to InfluxDB" % (len(points)))
+connect(FOURSQUARE_DATABASE)
+fetch_checkins(0)
+write_points(points)

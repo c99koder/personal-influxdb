@@ -133,3 +133,4 @@ dmypy.json
 .fitbit-refreshtoken
 *.sqlite
 *.code-workspace
+.vscode
