@@ -15,10 +15,12 @@
 
 import requests
 import sys
+import json
 from datetime import datetime
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlparse
 from config import *
+
 
 if not EXOPHASE_NAME:
     logging.error("EXOPHASE_NAME not set in config.py")
@@ -43,25 +45,28 @@ def scrape_latest_games(platform):
     games = []
     try:
         response = requests.get(
-            f"https://www.exophase.com/{platform}/user/{EXOPHASE_NAME}")
+            f"https://www.exophase.com/{platform}/user/{PSN_NAME}")
         response.raise_for_status()
     except requests.exceptions.HTTPError as err:
         logging.error("HTTP request failed: %s", err)
         sys.exit(1)
     soup = BeautifulSoup(response.text, 'html.parser')
     for game in soup.find_all("li", attrs={'data-gameid': True}):
-        playtime = int(float(game.select_one(
-            "span.hours").get_text()[:-1]) * 60)
-        img = game.select_one("div.image > img")['src']
-        img = urljoin(img, urlparse(img).path).replace(
-            "/games/m/", "/games/l/")
-        games.append({'gameid': game['data-gameid'],
-                      'time': datetime.fromtimestamp(float(game['data-lastplayed'])),
-                      'title': game.select_one("h3 > a").string,
-                      'url': game.select_one("h3 > a")['href'],
-                      'image': img,
-                      'playtime': playtime,
-                      })
+        try:
+            playtime = int(float(game.select_one(
+                "span.hours").get_text()[:-1]) * 60)
+            img = game.select_one("div.image > img")['src']
+            img = urljoin(img, urlparse(img).path).replace(
+                "/games/m/", "/games/l/")
+            games.append({'gameid': game['data-gameid'],
+                          'time': datetime.fromtimestamp(float(game['data-lastplayed'])),
+                          'title': game.select_one("h3 > a").string,
+                          'url': game.select_one("h3 > a")['href'],
+                          'image': img,
+                          'playtime': playtime,
+                          })
+        except Exception:  # Games with out total played time
+            pass
 
     return games
 
@@ -71,39 +76,44 @@ def scrape_achievements(url, gameid):
     try:
         response = requests.get(
             f"https://api.exophase.com/public/player/{urlparse(url).fragment}/game/{gameid}/earned")
+
         response.raise_for_status()
+
+        api_data = response.json()
+
     except requests.exceptions.HTTPError as err:
         logging.error("HTTP request failed: %s", err)
         sys.exit(1)
-    api_data = response.json()
+
     if api_data['success'] == True:
         achievement_data = {}
-        response = requests.get(url)
-        soup = BeautifulSoup(response.text, 'html.parser')
-        for achievement in soup.find_all("li", attrs={'data-type': 'achievement'}):
-            img = achievement.select_one("div.image > img")['src']
-            img = urljoin(img, urlparse(img).path)
-            achievement_data[achievement['id']] = {'id': achievement['id'],
-                                                   'name': achievement.select_one("div.award-title > a").string.replace("\xa0", " "),
-                                                   'description': achievement.select_one("div.award-description > p").string.replace("\xa0", " "),
-                                                   'image': img
-                                                   }
 
         for achievement in api_data['list']:
-            data = achievement_data[str(achievement['awardid'])]
-            data['time'] = datetime.fromtimestamp(achievement['timestamp'])
-            achievements.append(data)
+            api_desc_response = requests.get(achievement["endpoint"])
+            soup = BeautifulSoup(api_desc_response.text, 'html.parser')
+            award = soup.find("div", {"class": "col award-details snippet"}).p
+
+            achievement_data = {'id': achievement['awardid'],
+                                'name': achievement["slug"].replace("\xa0", " "),
+                                'image': achievement["icons"]["o"],
+                                'time': datetime.fromtimestamp(achievement['timestamp']),
+                                'description': award.text
+                                }
+            achievements.append(achievement_data)
+
+        # print(achievements)
+        # sys.exit(1)
 
     return achievements
 
 
-client = connect(STADIA_DATABASE)
+client = connect(PSN_DATABASE)
 
 PLAYERID, USERID = scrape_exophase_id()
 totals = client.query(
-    f'SELECT last("total") AS "total" FROM "time" WHERE "platform" = \'Stadia\' AND "total" > 0 AND "player_id" = \'{PLAYERID}\' GROUP BY "application_id" ORDER BY "time" DESC')
+    f'SELECT last("total") AS "total" FROM "time" WHERE "platform" = \'PSN\' AND "total" > 0 AND "player_id" = \'{PLAYERID}\' GROUP BY "application_id" ORDER BY "time" DESC')
 
-for game in scrape_latest_games('stadia'):
+for game in scrape_latest_games('psn'):
     value = game['playtime']
     total = list(totals.get_points(
         tags={'application_id': str(game['gameid'])}))
@@ -116,8 +126,8 @@ for game in scrape_latest_games('stadia'):
             "tags": {
                 "player_id": PLAYERID,
                 "application_id": game['gameid'],
-                "platform": "Stadia",
-                "player_name": STADIA_NAME,
+                "platform": "PSN",
+                "player_name": PSN_NAME,
                 "title": game['title'],
             },
             "fields": {
@@ -136,8 +146,8 @@ for game in scrape_latest_games('stadia'):
                 "player_id": PLAYERID,
                 "application_id": game['gameid'],
                 "apiname": achievement['id'],
-                "platform": "Stadia",
-                "player_name": STADIA_NAME,
+                "platform": "PSN",
+                "player_name": PSN_NAME,
                 "title": game['title'],
             },
             "fields": {
@@ -148,4 +158,5 @@ for game in scrape_latest_games('stadia'):
             }
         })
 
+# print(points)
 write_points(points)
