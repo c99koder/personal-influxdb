@@ -66,8 +66,8 @@ def scrape_achievements(url, gameid):
     except requests.exceptions.HTTPError as err:
         logging.error("HTTP request failed: %s", err)
         sys.exit(1)
-    json = response.json()
-    if json['success'] == True:
+    api_data = response.json()
+    if api_data['success'] == True:
         achievement_data = {}
         response = requests.get(url)
         soup = BeautifulSoup(response.text, 'html.parser')
@@ -80,7 +80,7 @@ def scrape_achievements(url, gameid):
             'image': img
             }
 
-        for achievement in json['list']:
+        for achievement in api_data['list']:
             data = achievement_data[str(achievement['awardid'])]
             data['time'] = datetime.fromtimestamp(achievement['timestamp'])
             achievements.append(data)
