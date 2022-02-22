@@ -102,13 +102,14 @@ RETROARCH_LOGS = '/home/ark/.config/retroarch/playlists/logs/'
 EMULATIONSTATION_ROMS = '/roms'
 RETROARCH_IMAGE_WEB_PREFIX = 'https://example.net/retroarch_images/'
 
-# Stadia configuration
+# Exophase configuration for Stadia and PSN
 EXOPHASE_NAME = ''
+
+# Stadia configuration
 STADIA_NAME = ''
 STADIA_DATABASE = GAMING_DATABASE
 
 # PSN configuration
-EXOPHASE_NAME = ''
 PSN_NAME = ''
 PSN_DATABASE = GAMING_DATABASE
 
