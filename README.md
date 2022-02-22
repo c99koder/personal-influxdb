@@ -21,6 +21,7 @@ Open `config.py` and set your API credentials and InfluxDB server configuration 
 * __RetroPie__: Place the shell files and python script into user `pi`'s home directory. Created or edit `/opt/retropie/configs/all/runcommand-onstart.sh` and append the line `bash "/home/pi/influx-onstart.sh" "$@"`. Create or edit `/opt/retropie/configs/all/runcommand-onend.sh` and append the line `bash "/home/pi/influx-onend.sh" "$@"`
 * __FsHub.io__: Generate a personal access token at https://fshub.io/settings/integrations and set your pilot ID to the number in your "Personal Dashboard" URL
 * __Stadia__: Link your Stadia account to [Exophase](https://www.exophase.com/) and then set your Exophase username and Stadia nickname
+* __PSN__: Link your PSN account to [Exophase](https://www.exophase.com/) and then set your Exophase username and PSN nickname
 
 ## Usage
 
