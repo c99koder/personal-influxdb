@@ -155,5 +155,5 @@ for game in scrape_latest_games('psn'):
             }
         })
 
-print(points)
-# write_points(points)
+# print(points)
+write_points(points)
