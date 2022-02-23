@@ -94,15 +94,12 @@ def scrape_achievements(url, gameid):
             award = soup.find("div", {"class": "col award-details snippet"}).p
 
             achievement_data = {'id': achievement['awardid'],
-                                'name': achievement["slug"].replace("\xa0", " "),
+                                'name': achievement["slug"].replace("-", " ").title(),
                                 'image': achievement["icons"]["o"],
                                 'time': datetime.fromtimestamp(achievement['timestamp']),
                                 'description': award.text
                                 }
             achievements.append(achievement_data)
-
-        # print(achievements)
-        # sys.exit(1)
 
     return achievements
 
@@ -158,5 +155,5 @@ for game in scrape_latest_games('psn'):
             }
         })
 
-# print(points)
-write_points(points)
+print(points)
+# write_points(points)
