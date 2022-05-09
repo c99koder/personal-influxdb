@@ -55,7 +55,7 @@ for event in activity:
 					project = api.projects.get(event['parent_project_id'])
 					projects[event['parent_project_id']] = project
 			except AttributeError as err:
-				logging.warn("Unable to fetch name for project ID %s", event['parent_project_id'])
+				logging.warning("Unable to fetch name for project ID %s", event['parent_project_id'])
 
 			if project != None:
 				points.append({

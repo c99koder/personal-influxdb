@@ -31,7 +31,7 @@ L = instaloader.Instaloader()
 try:
     L.load_session_from_file(INSTAGRAM_PROFILE)
 except FileNotFoundError:
-    logging.warn("Logging into Instagram can make this script more reliable. Try: instaloader -l {INSTAGRAM_PROFILE}")
+    logging.warning("Logging into Instagram can make this script more reliable. Try: instaloader -l {INSTAGRAM_PROFILE}")
 
 profile = Profile.from_username(L.context, INSTAGRAM_PROFILE)
 followers = profile.followers
