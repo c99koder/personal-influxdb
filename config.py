@@ -77,9 +77,9 @@ NS_SMART_DEVICE_ID = ''
 NS_SESSION_TOKEN = ''
 NS_CLIENT_ID = ''
 # These occasionally need to be updated when Nintendo changes the minimum allowed version
-NS_INTERNAL_VERSION = '303'
-NS_DISPLAY_VERSION = '1.15.0'
-NS_OS_VERSION = '14.2'
+NS_INTERNAL_VERSION = '321'
+NS_DISPLAY_VERSION = '1.17.0'
+NS_OS_VERSION = '15.2'
 NS_DATABASE = GAMING_DATABASE
 
 # OneTouch Reveal configuration
