@@ -184,9 +184,11 @@ def fetch_activities(date):
 connect(FITBIT_DATABASE)
 
 if not FITBIT_ACCESS_TOKEN:
-    if os.path.isfile('.fitbit-refreshtoken'):
-        f = open(".fitbit-refreshtoken", "r")
-        token = f.read()
+    script_dir = os.path.dirname(__file__)
+    refresh_token_path = os.path.join(script_dir, '.fitbit-refreshtoken')
+    if os.path.isfile(refresh_token_path):
+        f = open(refresh_token_path, "r")
+        token = f.read().strip()
         f.close()
         response = requests.post('https://api.fitbit.com/oauth2/token',
             data={
@@ -209,7 +211,7 @@ if not FITBIT_ACCESS_TOKEN:
     json = response.json()
     FITBIT_ACCESS_TOKEN = json['access_token']
     refresh_token = json['refresh_token']
-    f = open(".fitbit-refreshtoken", "w+")
+    f = open(refresh_token_path, "w+")
     f.write(refresh_token)
     f.close()
 
