@@ -34,7 +34,7 @@ $ python3 --version
 Install required python3 modules:
 
 ```shell
-$ pip3 install pytz influxdb requests requests-cache instaloader todoist-python trakt.py publicsuffix2 logging colorlog
+$ pip3 install pytz influxdb requests requests-cache instaloader todoist-python trakt.py publicsuffix2 logging colorlog bs4
 ```
 
 Run each Python script from the terminal and it will insert the most recent data into InfluxDB.
