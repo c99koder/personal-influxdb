@@ -71,6 +71,14 @@ INSTAGRAM_PROFILE = ''
 INSTAGRAM_DATABASE = 'instagram'
 INSTAGRAM_MAX_POSTS = 10 #set to 0 to download all posts
 
+# Freestyle LibreLinkUp configuration
+LIBRELINKUP_USERNAME = ''
+LIBRELINKUP_PASSWORD = ''
+LIBRELINKUP_DATABASE = 'glucose'
+LIBRELINKUP_URL = 'https://api-us.libreview.io'
+LIBRELINKUP_VERSION = '4.2.2'
+LIBRELINKUP_PRODUCT = 'llu.ios'
+
 # Nintendo Switch configuration
 NS_DEVICE_ID = ''
 NS_SMART_DEVICE_ID = ''
