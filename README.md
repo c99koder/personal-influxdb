@@ -22,6 +22,7 @@ Open `config.py` and set your API credentials and InfluxDB server configuration 
 * __FsHub.io__: Generate a personal access token at https://fshub.io/settings/integrations and set your pilot ID to the number in your "Personal Dashboard" URL
 * __Stadia__: Link your Stadia account to [Exophase](https://www.exophase.com/) and then set your Exophase username and Stadia nickname
 * __PSN__: Link your PSN account to [Exophase](https://www.exophase.com/) and then set your Exophase username and PSN nickname
+* __LibreLinkUp__: Open the Freestyle Libre app and choose `Connected Apps` from the menu, then send yourself an invite to `LibreLinkUp`. Install the `LibreLinkUp` app on your phone and accept the invitation, then set your username and password in the configuration file.
 
 ## Usage
 
