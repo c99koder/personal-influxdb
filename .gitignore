@@ -134,3 +134,4 @@ dmypy.json
 *.sqlite
 *.code-workspace
 .vscode
+.librelinkup-authtoken
