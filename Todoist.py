@@ -29,8 +29,12 @@ def get_project(project_id):
 			headers={'Authorization': f'Bearer {TODOIST_ACCESS_TOKEN}'})
 		response.raise_for_status()
 	except requests.exceptions.HTTPError as err:
-		logging.error("HTTP request failed: %s", err)
-		sys.exit(1)
+		if err.response.status_code == 404:
+			logging.warning("Project ID not found: %s", project_id)
+			return None
+		else:
+			logging.error("HTTP request failed: %s", err)
+			sys.exit(1)
 
 	return response.json()
 
