@@ -9,6 +9,7 @@
       "pluginName": "InfluxDB"
     }
   ],
+  "__elements": {},
   "__requires": [
     {
       "type": "panel",
@@ -20,7 +21,7 @@
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
-      "version": "8.0.4"
+      "version": "9.4.1"
     },
     {
       "type": "panel",
@@ -48,8 +49,8 @@
     },
     {
       "type": "panel",
-      "id": "table-old",
-      "name": "Table (old)",
+      "id": "table",
+      "name": "Table",
       "version": ""
     }
   ],
@@ -57,26 +58,35 @@
     "list": [
       {
         "builtIn": 1,
-        "datasource": "-- Grafana --",
+        "datasource": {
+          "type": "datasource",
+          "uid": "grafana"
+        },
         "enable": true,
         "hide": true,
         "iconColor": "rgba(0, 211, 255, 1)",
         "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
         "type": "dashboard"
       }
     ]
   },
   "editable": true,
-  "gnetId": null,
+  "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
   "id": null,
   "links": [],
+  "liveNow": false,
   "panels": [
     {
-      "datasource": null,
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
+      "datasource": {
+        "type": "datasource",
+        "uid": "grafana"
       },
       "gridPos": {
         "h": 1,
@@ -85,12 +95,23 @@
         "y": 0
       },
       "id": 9,
+      "targets": [
+        {
+          "datasource": {
+            "type": "datasource",
+            "uid": "grafana"
+          },
+          "refId": "A"
+        }
+      ],
       "title": "RescueTime",
       "type": "row"
     },
     {
-      "cacheTimeout": null,
-      "datasource": "${DS_RESCUETIME}",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_RESCUETIME}"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -127,7 +148,6 @@
         "y": 1
       },
       "id": 12,
-      "interval": null,
       "links": [],
       "maxDataPoints": 100,
       "options": {
@@ -145,9 +165,13 @@
         "text": {},
         "textMode": "auto"
       },
-      "pluginVersion": "8.0.4",
+      "pluginVersion": "9.4.1",
       "targets": [
         {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_RESCUETIME}"
+          },
           "groupBy": [
             {
               "params": [
@@ -190,20 +214,19 @@
           ]
         }
       ],
-      "timeFrom": null,
-      "timeShift": null,
       "title": "Productive Time",
       "type": "stat"
     },
     {
-      "cacheTimeout": null,
-      "datasource": "${DS_RESCUETIME}",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_RESCUETIME}"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "thresholds"
           },
-          "displayName": "${__cell_2}",
           "mappings": [],
           "max": 4000,
           "min": 0,
@@ -230,6 +253,8 @@
       "links": [],
       "options": {
         "displayMode": "gradient",
+        "minVizHeight": 10,
+        "minVizWidth": 0,
         "orientation": "vertical",
         "reduceOptions": {
           "calcs": [
@@ -242,10 +267,14 @@
         "showUnfilled": true,
         "text": {}
       },
-      "pluginVersion": "8.0.4",
+      "pluginVersion": "9.4.1",
       "targets": [
         {
           "alias": "",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_RESCUETIME}"
+          },
           "groupBy": [
             {
               "params": [
@@ -265,7 +294,7 @@
           "query": "SELECT top(s,10),activity FROM (SELECT sum(\"duration\") as s FROM \"activity\" WHERE $timeFilter GROUP BY \"activity\")",
           "rawQuery": true,
           "refId": "A",
-          "resultFormat": "table",
+          "resultFormat": "time_series",
           "select": [
             [
               {
@@ -283,14 +312,20 @@
           "tags": []
         }
       ],
-      "timeFrom": null,
-      "timeShift": null,
       "title": "Top Activities",
+      "transformations": [
+        {
+          "id": "concatenate",
+          "options": {}
+        }
+      ],
       "type": "bargauge"
     },
     {
-      "cacheTimeout": null,
-      "datasource": "${DS_RESCUETIME}",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_RESCUETIME}"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -316,7 +351,6 @@
         "y": 1
       },
       "id": 2,
-      "interval": null,
       "links": [],
       "maxDataPoints": 3,
       "options": {
@@ -324,6 +358,7 @@
           "calcs": [],
           "displayMode": "table",
           "placement": "right",
+          "showLegend": true,
           "values": [
             "value"
           ]
@@ -337,12 +372,17 @@
           "values": false
         },
         "tooltip": {
-          "mode": "single"
+          "mode": "single",
+          "sort": "none"
         }
       },
       "targets": [
         {
           "alias": "$tag_category",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_RESCUETIME}"
+          },
           "groupBy": [
             {
               "params": [
@@ -371,14 +411,14 @@
           "tags": []
         }
       ],
-      "timeFrom": null,
-      "timeShift": null,
       "title": "Categories",
       "type": "piechart"
     },
     {
-      "cacheTimeout": null,
-      "datasource": "${DS_RESCUETIME}",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_RESCUETIME}"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -415,7 +455,6 @@
         "y": 3
       },
       "id": 13,
-      "interval": null,
       "links": [],
       "maxDataPoints": 100,
       "options": {
@@ -433,9 +472,13 @@
         "text": {},
         "textMode": "auto"
       },
-      "pluginVersion": "8.0.4",
+      "pluginVersion": "9.4.1",
       "targets": [
         {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_RESCUETIME}"
+          },
           "groupBy": [
             {
               "params": [
@@ -478,14 +521,14 @@
           ]
         }
       ],
-      "timeFrom": null,
-      "timeShift": null,
       "title": "Distracting Time",
       "type": "stat"
     },
     {
-      "cacheTimeout": null,
-      "datasource": "${DS_RESCUETIME}",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_RESCUETIME}"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -526,7 +569,6 @@
         "y": 5
       },
       "id": 14,
-      "interval": null,
       "links": [],
       "maxDataPoints": 100,
       "options": {
@@ -544,9 +586,13 @@
         "text": {},
         "textMode": "auto"
       },
-      "pluginVersion": "8.0.4",
+      "pluginVersion": "9.4.1",
       "targets": [
         {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_RESCUETIME}"
+          },
           "groupBy": [
             {
               "params": [
@@ -583,8 +629,6 @@
           "tags": []
         }
       ],
-      "timeFrom": null,
-      "timeShift": null,
       "title": "Total Time",
       "type": "stat"
     },
@@ -593,7 +637,10 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_RESCUETIME}",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_RESCUETIME}"
+      },
       "fieldConfig": {
         "defaults": {
           "links": []
@@ -630,7 +677,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.0.4",
+      "pluginVersion": "9.4.1",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -646,6 +693,10 @@
       "targets": [
         {
           "alias": "Productivity",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_RESCUETIME}"
+          },
           "groupBy": [
             {
               "params": [
@@ -702,9 +753,7 @@
           "yaxis": "left"
         }
       ],
-      "timeFrom": null,
       "timeRegions": [],
-      "timeShift": null,
       "title": "Productivity",
       "tooltip": {
         "shared": false,
@@ -713,16 +762,13 @@
       },
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": true,
         "values": []
       },
       "yaxes": [
         {
           "format": "short",
-          "label": null,
           "logBase": 1,
           "max": "10000",
           "min": "-10000",
@@ -730,16 +776,12 @@
         },
         {
           "format": "short",
-          "label": null,
           "logBase": 1,
-          "max": null,
-          "min": null,
           "show": false
         }
       ],
       "yaxis": {
-        "align": false,
-        "alignLevel": null
+        "align": false
       }
     },
     {
@@ -747,7 +789,10 @@
       "bars": true,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "${DS_RESCUETIME}",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_RESCUETIME}"
+      },
       "fieldConfig": {
         "defaults": {
           "links": []
@@ -784,7 +829,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.0.4",
+      "pluginVersion": "9.4.1",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -804,6 +849,10 @@
       "targets": [
         {
           "alias": "Productive",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_RESCUETIME}"
+          },
           "groupBy": [
             {
               "params": [
@@ -849,6 +898,10 @@
         },
         {
           "alias": "Distracting",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_RESCUETIME}"
+          },
           "groupBy": [
             {
               "params": [
@@ -911,9 +964,7 @@
           "yaxis": "left"
         }
       ],
-      "timeFrom": null,
       "timeRegions": [],
-      "timeShift": null,
       "title": "Productive vs. Distracting Time",
       "tooltip": {
         "shared": true,
@@ -922,39 +973,114 @@
       },
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": true,
         "values": []
       },
       "yaxes": [
         {
           "format": "s",
-          "label": null,
           "logBase": 1,
-          "max": null,
-          "min": null,
           "show": false
         },
         {
           "format": "short",
-          "label": null,
           "logBase": 1,
-          "max": null,
-          "min": null,
           "show": false
         }
       ],
       "yaxis": {
-        "align": false,
-        "alignLevel": null
+        "align": false
       }
     },
     {
-      "columns": [],
-      "datasource": "${DS_RESCUETIME}",
-      "fontSize": "100%",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_RESCUETIME}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": false,
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "activity.top"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Duration"
+              },
+              {
+                "id": "unit",
+                "value": "s"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "activity.category"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Category"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "activity.activity"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Activity"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byType",
+              "options": "time"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          }
+        ]
+      },
       "gridPos": {
         "h": 8,
         "w": 12,
@@ -962,89 +1088,24 @@
         "y": 15
       },
       "id": 16,
-      "pageSize": null,
-      "showHeader": true,
-      "sort": {
-        "col": 3,
-        "desc": true
+      "options": {
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
       },
-      "styles": [
-        {
-          "alias": "Time",
-          "align": "auto",
-          "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "pattern": "Time",
-          "type": "hidden"
-        },
-        {
-          "alias": "",
-          "align": "auto",
-          "colorMode": null,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 2,
-          "mappingType": 1,
-          "pattern": "",
-          "thresholds": [],
-          "type": "number",
-          "unit": "short"
-        },
-        {
-          "alias": "Duration",
-          "align": "auto",
-          "colorMode": null,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "decimals": 2,
-          "pattern": "top",
-          "thresholds": [],
-          "type": "number",
-          "unit": "s"
-        },
-        {
-          "alias": "Activity",
-          "align": "auto",
-          "colorMode": null,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 2,
-          "mappingType": 1,
-          "pattern": "activity",
-          "thresholds": [],
-          "type": "string",
-          "unit": "short"
-        },
-        {
-          "alias": "Category",
-          "align": "auto",
-          "colorMode": null,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 2,
-          "mappingType": 1,
-          "pattern": "category",
-          "thresholds": [],
-          "type": "string",
-          "unit": "short"
-        }
-      ],
+      "pluginVersion": "9.4.1",
       "targets": [
         {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_RESCUETIME}"
+          },
           "groupBy": [
             {
               "params": [
@@ -1064,7 +1125,7 @@
           "query": "SELECT activity,category,top(s,25) FROM (SELECT sum(\"duration\") as s FROM \"activity\" WHERE $timeFilter AND productivity > 0 GROUP BY \"activity\",\"category\")",
           "rawQuery": true,
           "refId": "A",
-          "resultFormat": "table",
+          "resultFormat": "time_series",
           "select": [
             [
               {
@@ -1082,16 +1143,105 @@
           "tags": []
         }
       ],
-      "timeFrom": null,
-      "timeShift": null,
       "title": "Top Productive Activities",
-      "transform": "table",
-      "type": "table-old"
+      "transformations": [
+        {
+          "id": "concatenate",
+          "options": {
+            "frameNameLabel": "frame",
+            "frameNameMode": "field"
+          }
+        }
+      ],
+      "type": "table"
     },
     {
-      "columns": [],
-      "datasource": "${DS_RESCUETIME}",
-      "fontSize": "100%",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_RESCUETIME}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "activity.top"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Duration"
+              },
+              {
+                "id": "unit",
+                "value": "s"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "activity.activity"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Activity"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "activity.category"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Category"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byType",
+              "options": "time"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          }
+        ]
+      },
       "gridPos": {
         "h": 8,
         "w": 12,
@@ -1099,89 +1249,24 @@
         "y": 15
       },
       "id": 17,
-      "pageSize": null,
-      "showHeader": true,
-      "sort": {
-        "col": 3,
-        "desc": true
+      "options": {
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
       },
-      "styles": [
-        {
-          "alias": "Time",
-          "align": "auto",
-          "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "pattern": "Time",
-          "type": "hidden"
-        },
-        {
-          "alias": "",
-          "align": "auto",
-          "colorMode": null,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 2,
-          "mappingType": 1,
-          "pattern": "",
-          "thresholds": [],
-          "type": "number",
-          "unit": "short"
-        },
-        {
-          "alias": "Duration",
-          "align": "auto",
-          "colorMode": null,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "decimals": 2,
-          "pattern": "top",
-          "thresholds": [],
-          "type": "number",
-          "unit": "s"
-        },
-        {
-          "alias": "Activity",
-          "align": "auto",
-          "colorMode": null,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 2,
-          "mappingType": 1,
-          "pattern": "activity",
-          "thresholds": [],
-          "type": "string",
-          "unit": "short"
-        },
-        {
-          "alias": "Category",
-          "align": "auto",
-          "colorMode": null,
-          "colors": [
-            "rgba(245, 54, 54, 0.9)",
-            "rgba(237, 129, 40, 0.89)",
-            "rgba(50, 172, 45, 0.97)"
-          ],
-          "dateFormat": "YYYY-MM-DD HH:mm:ss",
-          "decimals": 2,
-          "mappingType": 1,
-          "pattern": "category",
-          "thresholds": [],
-          "type": "string",
-          "unit": "short"
-        }
-      ],
+      "pluginVersion": "9.4.1",
       "targets": [
         {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_RESCUETIME}"
+          },
           "groupBy": [
             {
               "params": [
@@ -1201,7 +1286,7 @@
           "query": "SELECT activity,category,top(s,25) FROM (SELECT sum(\"duration\") as s FROM \"activity\" WHERE $timeFilter AND productivity < 0 GROUP BY \"activity\",\"category\")",
           "rawQuery": true,
           "refId": "A",
-          "resultFormat": "table",
+          "resultFormat": "time_series",
           "select": [
             [
               {
@@ -1219,15 +1304,19 @@
           "tags": []
         }
       ],
-      "timeFrom": null,
-      "timeShift": null,
       "title": "Top Distracting Activities",
-      "transform": "table",
-      "type": "table-old"
+      "transformations": [
+        {
+          "id": "concatenate",
+          "options": {}
+        }
+      ],
+      "type": "table"
     }
   ],
-  "refresh": false,
-  "schemaVersion": 30,
+  "refresh": "",
+  "revision": 1,
+  "schemaVersion": 38,
   "style": "dark",
   "tags": [],
   "templating": {
@@ -1254,5 +1343,6 @@
   "timezone": "",
   "title": "RescueTime",
   "uid": "peIaduZgk",
-  "version": 30
+  "version": 31,
+  "weekStart": ""
 }
