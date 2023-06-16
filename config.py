@@ -76,7 +76,7 @@ LIBRELINKUP_USERNAME = ''
 LIBRELINKUP_PASSWORD = ''
 LIBRELINKUP_DATABASE = 'glucose'
 LIBRELINKUP_URL = 'https://api-us.libreview.io'
-LIBRELINKUP_VERSION = '4.2.2'
+LIBRELINKUP_VERSION = '4.7.0'
 LIBRELINKUP_PRODUCT = 'llu.ios'
 
 # Nintendo Switch configuration
