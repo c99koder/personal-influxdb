@@ -1,0 +1,23 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: freelibre-cron
+  namespace: default
+spec:
+  schedule: "0 */1 * * *"
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: freelibre-job
+        spec:
+          containers:
+          - name: freelibre-upload-cron
+            image: evanrich/freelibre2influx:latest
+            imagePullPolicy: IfNotPresent
+            envFrom:
+            - secretRef:
+                name: freestyle-secrets
+          restartPolicy: OnFailure

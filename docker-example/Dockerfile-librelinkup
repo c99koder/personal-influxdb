@@ -1,0 +1,27 @@
+FROM python:3.11.4-alpine3.18
+
+LABEL maintainer="Evan Richardson (evanrich81[at]gmail.com)"
+
+# Set the working directory to /app
+WORKDIR /app
+
+# Copy the requirements.txt file into the container at /app
+COPY requirements.txt /app/
+
+# Install the Python dependencies specified in requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the link.py and config.py files to the root directory
+COPY librelinkup.py /
+COPY config.py /
+
+ENV INFLUXDB_HOST="default_host"
+ENV INFLUXDB_PORT="default_port"
+ENV INFLUXDB_USER="default_username"
+ENV INFLUXDB_PASSWORD="default_password"
+ENV LIBRELINKUP_DATABASE="database"
+ENV LIBRELINKUP_USERNAME="librelinkup_username"
+ENV LIBRELINKUP_PASSWORD="librelinkup_password"
+
+# Run the Python script link.py
+CMD ["python", "/librelinkup.py"]
