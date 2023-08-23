@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-# Copyright 2022 Sam Steele
+# Copyright 2023 Sam Steele
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
 
 import requests, sys, re, json
 from datetime import datetime
-from bs4 import BeautifulSoup
 from config import *
 
 if not STEAM_API_KEY:
@@ -63,30 +62,34 @@ def fetch_recents():
         sys.exit(1)
     json = response.json()
     if 'response' in json and 'games' in json['response']:
-        logging.info("Got %s games from Steam", json['response']['total_count'])
+        logging.info("Got %s games from Steam recents", json['response']['total_count'])
         return json['response']['games']
     else:
         return []
 
-def scrape_recents():
+def fetch_owned_games():
     try:
-        response = requests.get(f'https://steamcommunity.com/id/{STEAM_USERNAME}/games/?tab=all')
+        response = requests.get('https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/',
+            params={'key': STEAM_API_KEY, 'steamid': STEAM_ID})
         response.raise_for_status()
     except requests.exceptions.HTTPError as err:
         logging.error("HTTP request failed: %s", err)
         sys.exit(1)
-    soup = BeautifulSoup(response.text, 'html.parser')
-    data = soup.find('script', string=re.compile('var rgGames = \[\{')).string
-    return json.loads(data[data.index('['):data.index('}}];') + 3])
+    json = response.json()
+    if 'response' in json and 'games' in json['response']:
+        logging.info("Got %s games from Steam library", json['response']['game_count'])
+        return json['response']['games']
+    else:
+        return []
 
 client = connect(STEAM_DATABASE)
 
 totals = client.query(f'SELECT last("total") AS "total" FROM "time" WHERE "platform" = \'Steam\' AND "total" > 0 AND "player_id" = \'{STEAM_ID}\' GROUP BY "application_id" ORDER BY "time" DESC')
-recents = scrape_recents()
+games = fetch_owned_games()
 
 for app in fetch_recents():
-    for recent in recents:
-        if recent['appid'] == app['appid']:
+    for game in games:
+        if game['appid'] == app['appid']:
             value = app['playtime_2weeks']
             total = list(totals.get_points(tags={'application_id': str(app['appid'])}))
             if len(total) == 1 and total[0]['total'] > 0:
@@ -94,7 +97,7 @@ for app in fetch_recents():
             if value > 1:
                 points.append({
                     "measurement": "time",
-                    "time": datetime.fromtimestamp(recent['last_played']).isoformat(),
+                    "time": datetime.fromtimestamp(game['rtime_last_played']).isoformat(),
                     "tags": {
                         "player_id": STEAM_ID,
                         "application_id": app['appid'],
