@@ -65,7 +65,7 @@ else:
 Trakt.configuration.defaults.oauth.from_response(auth)
 
 for item in Trakt['sync/history'].get(pagination=True, per_page=100, start_at=datetime(date.today().year, date.today().month, 1), extended='full'):
-	if item.action == "watch":
+	if item.action == "watch" or item.action == "scrobble":
 		if isinstance(item, Episode):
 			if not item.show.get_key('tmdb') in posters:
 				posters[item.show.get_key('tmdb')] = fetch_poster('tv', item.show.get_key('tmdb'))
