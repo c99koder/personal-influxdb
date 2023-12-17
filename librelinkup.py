@@ -67,7 +67,11 @@ if LIBRELINKUP_TOKEN is None:
 
     data = response.json()
     if not 'authTicket' in data['data']:
-        logging.error("Authentication failed")
+        logging.error("Authentication failed. Server response:")
+        logging.info(data)
+        if 'redirect' in data['data'] and data['data']['redirect'] is True:
+            region = data['data']['region']
+            logging.error(f"The LibreLinkUp API returned a redirect. You should try the following url for LIBRELINKUP_URL in config.py: https://api-{region}.libreview.io")
         sys.exit(1)
 
     with open(auth_token_path, 'w') as outfile:
