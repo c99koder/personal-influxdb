@@ -233,8 +233,7 @@ for device in data:
         "tags": {
             "id": device['id'],
             "deviceVersion": device['deviceVersion'],
-            "type": device['type'],
-            "mac": device['mac'],
+            "type": device['type']
         },
         "fields": {
             "value": float(device['batteryLevel'])
