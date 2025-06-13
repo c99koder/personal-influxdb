@@ -26,6 +26,12 @@ if not TRAKT_CLIENT_ID:
 points = []
 posters = {}
 
+def on_token_refreshed(response):
+	global oauth_config_file
+	with open(oauth_config_file, 'w') as outfile:
+		json.dump(response, outfile)
+
+
 def fetch_poster(type, tmdb_id):
 	if tmdb_id == None:
 		return None
@@ -62,7 +68,8 @@ else:
 	with open(oauth_config_file) as json_file:
 		auth = json.load(json_file)
 
-Trakt.configuration.defaults.oauth.from_response(auth)
+Trakt.on('oauth.token_refreshed', on_token_refreshed)
+Trakt.configuration.defaults.oauth.from_response(auth, refresh=True)
 
 for item in Trakt['sync/history'].get(pagination=True, per_page=100, start_at=datetime(date.today().year, date.today().month, 1), extended='full'):
 	if item.action == "watch" or item.action == "scrobble":
